@@ -1,0 +1,245 @@
+/* Sticky footer styles
+-------------------------------------------------- */
+
+html,
+body {
+    height: 100%;
+    /* The html and body elements cannot have any padding or margin. */
+    background-image: url("img/creampaper.png");
+    overflow-y: scroll;
+}
+
+/* Wrapper for page content to push down footer */
+#wrap {
+    min-height: 100%;
+    height: auto;
+    /* Negative indent footer by its height */
+    margin: 0 auto -60px;
+    /* Pad bottom by footer height */
+    padding: 0 0 60px;
+
+    background: url('img/bg-logo-005.png') no-repeat center 62% fixed;
+}
+
+/* Set the fixed height of the footer here */
+#footer {
+    height: 30px;
+    background-color: #1E439A;
+    box-shadow: 0px -2px 1px #E6A117;
+}
+
+/* Custom page CSS
+-------------------------------------------------- */
+/* Not required for template or sticky footer method. */
+
+#wrap > .container {
+    padding: 100px 15px 0;
+}
+
+.container .credit {
+    margin: 20px 0;
+    color: #E6A117;
+}
+
+#footer > .container {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+code {
+    font-size: 80%;
+}
+
+#main-menu {
+    background-color: #1E439A;
+    margin-top: 38px;
+    padding: 7px;
+    box-shadow: 0px 2px 1px #E6A117;
+}
+
+.navbar-default .navbar-nav > li > a {
+    color: #F6D89C;
+    padding: 7px;
+    font-weight: bold;
+    font-size: 15pt;
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+}
+
+.navbar-default .navbar-nav > li > a:hover {
+    color: #E6A117;
+}
+
+.navbar-default .navbar-nav > .active > a {
+    background-color: #658ADD;
+    color: #E6A117;
+    padding: 7px;
+}
+
+.navbar-default .navbar-nav > .active > a:active {
+    background-color: #658ADD;
+    color: #E6A117;
+}
+
+.navbar-default .navbar-nav > .active > a:focus {
+    background-color: #658ADD;
+    color: #E6A117;
+}
+
+.navbar-default .navbar-nav > .active > a:hover {
+    color: #E6A117;
+    background-color: #94AADD;
+}
+
+.nav-pills > li {
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, .065);
+    -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, .065);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .065);
+}
+
+.nav-pills > li > a {
+    color: #F6D89C;
+    background-color: rgba(30, 67, 154, 0.75);
+    margin-left: 4px;
+    margin-right: 4px;
+    /*opacity: 0.76;*/
+}
+
+.nav-pills > li > a > .badge {
+    background-color: #9A7B3D;
+    text-shadow: none;
+}
+
+.nav-pills > li.active > a {
+    color: #E6A117;
+    background-color: rgba(148, 170, 221, 0.75);
+    font-weight: bold;
+    text-shadow: 1px 1px 1px #000000;
+}
+
+.nav-pills > li > a:hover {
+    background-color: #2F4067;
+}
+
+#main-navbar {
+    height: 93px;
+    background-color: #94AADD;
+}
+
+#inner-navbar {
+    margin-left: 70px;
+}
+
+#main-logo {
+    position: fixed;
+    float: left;
+    margin-left: -60px;
+    margin-top: -40px;
+    z-index: 200;
+}
+
+#name-logo {
+    margin-top: -50px;
+    margin-right: -50px;
+}
+
+.page-header {
+    color: #1E439A;
+    border-bottom: 1px solid #94AADD;
+}
+
+h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5 {
+    color: #1E439A;
+}
+
+#bg-logo {
+    position: absolute;
+    width: 529px;
+    height: 569px;
+    left: 50%;
+    top: 42%;
+    margin-left: -264px;
+    margin-top: -205px;
+    opacity: 0.1;
+    filter: alpha(opacity=10);
+    z-index: 0;
+    background: url('img/bg-logo.png') no-repeat;
+}
+
+#main-view {
+    z-index: 1;
+}
+
+.divider-photo {
+    text-align: center;
+}
+
+.divider-photo img {
+    border: 8px solid white;
+    -moz-border-radius: 7px;
+    border-radius: 7px;
+    box-shadow: 4px 4px 8px #888899;
+}
+
+.recept-list {
+    width: 220px;
+    margin-right: 20px;
+    margin-left: -50px;
+    margin-top: 40px;
+    padding: 0;
+    background-color: rgba(246,216,156,0.75);
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, .065);
+    -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, .065);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .065);
+}
+
+.recept-list > li > a:hover {
+    background-color: rgba(246,197,98,0.75);
+}
+
+.recept-list > li > a {
+    margin: 0 0 -1px;
+    padding: 8px 14px;
+    border: 1px solid #658ADD;
+}
+
+.recept-list > li:first-child > a {
+    -webkit-border-radius: 6px 6px 0 0;
+    -moz-border-radius: 6px 6px 0 0;
+    border-radius: 6px 6px 0 0;
+}
+.recept-list > li:last-child > a {
+    -webkit-border-radius: 0 0 6px 6px;
+    -moz-border-radius: 0 0 6px 6px;
+    border-radius: 0 0 6px 6px;
+}
+
+#styrelse-table {
+    width: 70%;
+    /*margin-left: auto;*/
+    margin-right: auto;
+}
+
+#styrelse-table .styrelse-name {
+    border-bottom: none;
+    font-size: x-large;
+}
+
+#styrelse-table .styrelse-title {
+    border-top: none;
+    line-height: 0.8;
+    padding-top: 1px;
+    font-style: italic;
+}
+
+#styrelse-table .styrelse-info th {
+    width: 120px;
+    text-align: right;
+}

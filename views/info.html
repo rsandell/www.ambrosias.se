@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<div class="page-header">
+    <h1>Föreningsinformation</h1>
+</div>
+<p class="lead">
+    Medlemsavgiften för 2013 är;
+<dl class="dl-horizontal">
+    <dt>Medlemmar</dt>
+    <dd>250kr</dd>
+    <dt>Provmedlemmar</dt>
+    <dd>100kr</dd>
+    <dt>Stödmedlemmar</dt>
+    <dd>minst 200kr</dd>
+</dl>
+</p>
+<p>
+    Medlemsavgiften betalas in på bank giro nr: <strong>355-2791</strong>
+</p>
+<h2>Styrelsen</h2>
+<table class="table" id="styrelse-table">
+    <tr ng-repeat-start="p in styrelse.people">
+        <th colspan="2" class="styrelse-name">{{p.name}}</th>
+    </tr>
+    <tr>
+        <td colspan="2" class="styrelse-title">
+            {{p.title}}
+        </td>
+    </tr>
+    <tr class="styrelse-info">
+        <th>Mail</th>
+        <td ng-bind-html="p.mail | brevtagg"/>
+    </tr>
+    <tr class="styrelse-info">
+        <th>Tel</th>
+        <td>{{p.phone}}</td>
+    </tr>
+    <tr ng-if="p.replacer" class="styrelse-info">
+        <th>Ersättare</th>
+        <td>
+            {{p.replacer.name}}<br/>
+            <span ng-bind-html="p.replacer.mail | brevtagg"/>
+        </td>
+    </tr>
+    <tr ng-repeat-end>
+        <td colspan="2">&nbsp;</td>
+    </tr>
+</table>

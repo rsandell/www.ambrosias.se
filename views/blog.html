@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html>
+<div class="page-header">
+    <h1>Blog</h1>
+</div>
+<div ng-repeat="post in posts.items | limit:postsLimit">
+    <h2 href="{{post.selfLink}}">
+        <a href="{{post.url}}">{{displayTitle(post)}}</a>
+    </h2>
+    <div class="text-right">
+        <small>
+            <em>
+                Publicerad {{post.published | date:medium}} av
+                <a href="{{post.author.url}}">{{post.author.displayName}}</a>
+            </em>
+        </small>
+    </div>
+    <div ng-bind-html="post.content"/>
+    <p>&nbsp;</p>
+</div>
+<p>
+&nbsp;
+</p>
+<blockquote>
+    <p><a href="http://ambrosiasorden.blogspot.se/">{{posts.items.length - postsLimit}} fler poster...</a></p>
+</blockquote>

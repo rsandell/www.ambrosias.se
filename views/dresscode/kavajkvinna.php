@@ -1,0 +1,28 @@
+<?
+$extTitle = "Tips/Kl&auml;dkoder/Kavaj - Kvinna";
+//$subMenu = "tips";
+require_once("../menues/dresscode.php");
+include_once('../page_header.php');
+?>
+<h1>Kavaj, klädsel för kvinnan</h1>
+<h2>Kavajkl&auml;dsel f&ouml;r kvinnor </h2>
+<p>Kavajkl&auml;dsel inneb&auml;r p&aring; bjudningskortet att man skall kl&auml; upp sig mer &auml;n till b&auml;ttre vardag. Tillst&auml;llningen &auml;r av den n&aring;got elegantare arten och d&auml;rf&ouml;r kr&auml;ver en finare kl&auml;dsel.</p>
+<p>Det &auml;r inte detsamma som m&ouml;rk kostym eller aftonkl&auml;nning f&ouml;r henne. Och betyder  inte herrkavaj, det &auml;r kl&auml;dniv&aring;n.</p>
+<h2>Fin vardag </h2>
+<p>B&auml;ttre &auml;n vardag &auml;r koden. En aftonkl&auml;nning, hell&aring;ng eller kn&auml;l&aring;ng i glittrande material, eller festbyxdress b&auml;rs inte till fin vardag.</p>
+<h2>F&ouml;rslag kavajkl&auml;dsel f&ouml;r henne</h2>
+<ul>
+  <li>En kjol och jacka &auml;r utm&auml;rkt om det inte &auml;r vardagsbetonat</li>
+  <li>En kl&auml;nning som inte &auml;r blank eller glittrig</li>
+  <li>Diskret urringad</li>
+  <li>G&auml;rna med en &auml;rm som passar fint</li>
+  <li>En snygg byxdress med fina tillbeh&ouml;r,         smycken</li>
+  <li>En kavaj av siden, sammet eller fint         tunt ylle eller linne passar</li>
+  <li>Om br&ouml;llop och sommartid och         kavajkl&auml;nningen &auml;r bar&auml;rmad eller urringad s&aring; b&ouml;r en schal eller jacka         b&auml;ras under vigseln i kyrkan.</li>
+  <li>H&aring;ret &auml;r valfritt i frisyr</li>
+  <li>Lackskor och lackv&auml;ska tillh&ouml;r inte         kavajkl&auml;dsel (m&ouml;rk kostym)</li>
+</ul>
+<p align="right" style="font-size: smaller; font-style:italic">K&auml;lla: <a href="http://www.etikettsdoktorn.se">www.etikettsdoktorn.se</a></p>
+<?
+include_once('../page_footer.php');
+?>

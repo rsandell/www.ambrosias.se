@@ -1,0 +1,11 @@
+{
+    "name": "ambrosias-api",
+    "description": "Ambrosias WWW API Application",
+    "version": "0.0.1",
+    "private": true,
+    "dependencies": {
+        "express": "3.x",
+        "mysql": "2.0.x",
+        "feedparser": "0.16.x"
+    }
+}
