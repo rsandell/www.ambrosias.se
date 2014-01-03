@@ -40,6 +40,6 @@ var styrelsen = { people: [
 
 
 exports.get = function(req, res) {
-    res.header('Access-Control-Allow-Origin', "*");
+    //res.header('Access-Control-Allow-Origin', "*");
     res.send(styrelsen);
 };

@@ -16,7 +16,7 @@ exports.allowedDomains = new Array( ".*.ambrosias.se",
 exports.album = {
 	picasaAuthKey: 'auth key',
 	mysql_conn: {
-		username: "username",
+		user: "username",
 		password: "password",
 		database: "schema"
 	}
