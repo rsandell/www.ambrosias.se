@@ -1,0 +1,23 @@
+
+exports.mysql_conn = {
+  user: "username",
+  password: "password",
+  database: "schema"
+};
+
+exports.allowedDomains = new Array( ".*.ambrosias.se",
+                                ".*.ambrosias.nu",
+                                ".*.ambrosias.org",
+                                ".*.ambrosiasorden.se",
+                                ".*.ambrosiasorden.com",
+                                ".*.ambrosiasorden.net",
+                                ".*.ambrosiasorden.org");
+
+exports.album = {
+	picasaAuthKey: 'auth key',
+	mysql_conn: {
+		username: "username",
+		password: "password",
+		database: "schema"
+	}
+};
