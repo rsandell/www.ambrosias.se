@@ -38,6 +38,8 @@ app.get('/recept/:id/types', recept.findTypesByReceptId);
 app.get('/styrelse', styrelse.get);
 app.get('/album/categories', album.categories);
 app.get('/album/categories/:id', album.subcategories);
+app.get('/album/categories/:category/:subcategory', album.listAlbums);
+app.get('/album/:id', album.album);
 
 app.listen(3000);
 console.log(new Date() + ' Listening on port 3000...');

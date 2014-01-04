@@ -244,3 +244,48 @@ h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5 {
     width: 120px;
     text-align: right;
 }
+
+#album-category-panel .thumbnail {
+    border: 1px solid #1E439A;
+    margin: 3px;
+    background-color: rgba(148, 170, 221, 0.75);
+    height: 245px;
+}
+
+#album-category-panel .thumbnail:hover {
+    cursor: pointer;
+    box-shadow: 0 2px 2px rgba(0,0,0,0.25);
+}
+
+#album-category-panel .thumbnail h4,h5 {
+    margin: 0;
+    text-align: center;
+    margin-left: -9px;
+    margin-right: -9px;
+}
+
+#album-category-panel .thumbnail img {
+    margin: 0;
+    margin-left: auto;
+    margin-right: auto;
+    border: 1px solid #1E439A;
+    border-radius: 4px;
+}
+
+#album-category-panel .album-summary,.album-author {
+    font-style: italic;
+    margin-right: auto;
+    margin-left: auto;
+    text-align: center;
+}
+
+#album-category-panel .back-link {
+    font-size: smaller;
+    margin-left: -14px;
+    margin-top: -12px;
+}
+
+#album-category-panel {
+    background-color: rgba(246,216,156,0.55);
+    border: 1px solid #1E439A;
+}

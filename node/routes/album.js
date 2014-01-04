@@ -226,6 +226,8 @@ exports.addAlbumFromRss = function(rssUrl) {
 
 var SQL_GET_CATEGORIES = "SELECT DISTINCT(category) AS category, (SELECT icon FROM album AS b WHERE b.category=a.category LIMIT 1) AS icon FROM album AS a ORDER BY category";
 var SQL_GET_SUBCATEGORIES = "SELECT DISTINCT(subcategory) AS subcategory, (SELECT icon FROM album AS b WHERE b.category=a.category AND a.subcategory=b.subcategory LIMIT 1) AS icon FROM album AS a WHERE category=? ORDER BY subcategory";
+var SQL_LIST_ALBUMS = "SELECT id, authorname, authoruri, title, icon, summary FROM album WHERE category=? AND subcategory=?";
+var SQL_GET_ALBUM = "SELECT id, picasa_userId, picasa_albumId, picasa_authKey FROM album WHERE id=?";
 
 exports.categories = function(req, res) {
     connection.query(SQL_GET_CATEGORIES, function (error, rows, fields) {
@@ -244,6 +246,40 @@ exports.subcategories = function(req, res) {
         } else {
             if(rows.length > 0) {
                 res.send(rows);
+            } else {
+                res.send(404);
+            }
+        }
+    });
+};
+
+exports.listAlbums = function(req, res) {
+    connection.query(SQL_LIST_ALBUMS, [req.params.category, req.params.subcategory], function (error, rows, fields) {
+        if (error) {
+            throw error;
+        } else {
+            if(rows.length > 0) {
+                res.send(rows);
+            } else {
+                res.send(404);
+            }
+        }
+    });
+};
+
+exports.album = function(req, res) {
+    connection.query(SQL_GET_ALBUM, [req.params.id], function (error, rows, fields) {
+        if (error) {
+            throw error;
+        } else {
+            if(rows.length === 1) {
+                var data = rows[0];
+                getAlbum(data.picasa_userId, data.picasa_albumId, data.picasa_authKey, function(err, album) {
+                    if(err) {
+                        throw err;
+                    }
+                    res.send(album);
+                });
             } else {
                 res.send(404);
             }

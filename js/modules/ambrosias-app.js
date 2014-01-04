@@ -27,6 +27,18 @@ app.config(function($routeProvider) {
             controller: "ReceptController",
             templateUrl: "views/recept-types.html"
         })
+        .when('/album', {
+            controller: "AlbumController",
+            templateUrl: "views/album.html"
+        })
+        .when('/album/:category', {
+            controller: "AlbumController",
+            templateUrl: "views/album.html"
+        })
+        .when('/album/:category/:subCategory', {
+            controller: "AlbumController",
+            templateUrl: "views/album.html"
+        })
         .when('/dresscode/', {
             controller: "DresscodeController",
             templateUrl: "views/dresscode/index.html"
@@ -116,6 +128,70 @@ app.factory('OnePostFactory', function($resource){
 
 app.factory('StyrelseFactory', function($resource) {
     return $resource('http://api.ambrosias.se/styrelse');
+});
+
+app.factory('AlbumCategoriesFactory', function($resource) {
+    return $resource("http://api.ambrosias.se/album/categories");
+});
+
+app.factory('AlbumSubCategoriesFactory', function($resource) {
+    return $resource("http://api.ambrosias.se/album/categories/:category", {category: "@category"});
+});
+
+app.factory('AlbumListFactory', function($resource) {
+    return $resource("http://api.ambrosias.se/album/categories/:category/:subcategory", {category: "@category", subcategory: "@subcategory"});
+});
+
+app.factory('AlbumFactory', function($resource) {
+    return $resource("http://api.ambrosias.se/album/:id", {id: "@id"});
+});
+
+app.controller("AlbumController", function($scope, $routeParams, $location, AlbumCategoriesFactory, AlbumSubCategoriesFactory, AlbumListFactory, AlbumFactory) {
+    $scope.categories = AlbumCategoriesFactory.query();
+    $scope.category = $routeParams.category;
+    $scope.subCategory = $routeParams.subCategory;
+    if($scope.category) {
+        $scope.subCategories = AlbumSubCategoriesFactory.query({category: $scope.category});
+    }
+    if($scope.subCategory) {
+        $scope.albums = AlbumListFactory.query({category: $scope.category, subcategory: $scope.subCategory});
+    }
+
+    $scope.selectCategory = function(cat) {
+        $location.path("/album/" + cat.category);
+    };
+    $scope.selectSubCategory = function(cat) {
+        $location.path("/album/" + $scope.category + "/" + cat.subcategory);
+    };
+
+    $scope.showCategories = function() {
+        if($scope.category) {
+            return false;
+        } else {
+            return true;
+        }
+    };
+    $scope.showSubCategories = function() {
+        if($scope.category && !$scope.subCategory) {
+            return true;
+        } else {
+            return false;
+        }
+    };
+    $scope.showAlbums = function() {
+        if($scope.category && $scope.subCategory) {
+            return true;
+        } else {
+            return false;
+        }
+    };
+    $scope.albumAuthorDisplay = function(alb) {
+        if(alb.authoruri) {
+            return "<a href='"+alb.authoruri+"' target='_new'>" + alb.authorname + "</a>";
+        } else {
+            return alb.authorname;
+        }
+    };
 });
 
 app.controller("BlogFeedController", function($scope, $filter, BlogPostsFactory, OnePostFactory) {

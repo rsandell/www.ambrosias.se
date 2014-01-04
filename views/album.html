@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<div class="page-header">
+    <h1>Fotoalbum</h1>
+</div>
+<div class="panel panel-default" id="album-category-panel">
+	<div class="panel-body" id="album-categories" ng-cloak="true" ng-show="showCategories()">
+		<div class="thumbnail col-xs-4 col-md-2" ng-repeat="cat in categories" ng-click="selectCategory(cat)">
+			<img src="{{cat.icon}}" alt="{{cat.category}}"/>
+			<div class="caption">
+				<h4>{{cat.category}}</h4>
+			</div>
+		</div>
+	</div>
+	<div class="panel-body" id="album-sub-categories" ng-cloak="true" ng-show="showSubCategories()">
+	<div class="back-link"><a href="#/album"><span class="glyphicon glyphicon-chevron-left"/> Kategorier</a></div>
+		<div class="thumbnail col-xs-4 col-md-2" ng-repeat="cat in subCategories" ng-click="selectSubCategory(cat)">
+			<img src="{{cat.icon}}" alt="{{cat.subcategory}}"/>
+			<div class="caption">
+				<h4>{{cat.subcategory}}</h4>
+			</div>
+		</div>
+	</div>
+	<div class="panel-body" id="album-albums" ng-cloak="true" ng-show="showAlbums()">
+		<div class="back-link"><a href="#/album/{{category}}"><span class="glyphicon glyphicon-chevron-left"/> {{category}}</a></div>
+		<div class="thumbnail col-xs-4 col-md-2" ng-repeat="alb in albums" ng-click="selectAlbum(alb)">
+			<img src="{{alb.icon}}" alt="{{alb.title}}"/>
+			<div class="caption">
+				<h4>{{alb.title}}</h4>
+				<div class="album-summary" ng-if="alb.summary">{{alb.summary}}</div>
+				<div class="album-author">av <span ng-bind-html="albumAuthorDisplay(alb)"</span></div>
+			</div>
+		</div>
+	</div>
+</div>
+
