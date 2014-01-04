@@ -1,15 +1,16 @@
 var http  = require("http");
 var conf  = require("./conf").album;
 var mysql = require("mysql");
+var urlLib = require("url");
 
 var PICASA_ALBUMS_URL = 'http://picasaweb.google.com/data/feed/api/user/:userId:/albumid/:albumId:?alt=json&authkey=:authkey:';
 
 var connection = mysql.createConnection(conf.mysql_conn);
 
-function genAlbumUrl(userId, albumId) {
+function genAlbumUrl(userId, albumId, authKey) {
 	var temp = PICASA_ALBUMS_URL.replace(":userId:", userId);
 	temp = temp.replace(":albumId:", albumId);
-	temp = temp.replace(":authkey:", conf.picasaAuthKey);
+	temp = temp.replace(":authkey:", authKey);
 	return temp;
 }
 
@@ -24,6 +25,20 @@ function parseAlbum(content) {
     	uri: content.feed.author[0].uri.$t
     };
     album.icon = content.feed.icon.$t;
+    album.gphoto = {
+        id: content.feed.gphoto$id.$t,
+        name: content.feed.gphoto$name.$t,
+        location: content.feed.gphoto$location.$t,
+        access: content.feed.gphoto$access.$t,
+        timestamp: content.feed.gphoto$timestamp.$t,
+        numphotos: content.feed.gphoto$numphotos.$t,
+        user: content.feed.gphoto$user.$t,
+        nickname: content.feed.gphoto$nickname.$t,
+        commentingEnabled: content.feed.gphoto$commentingEnabled.$t,
+        commentCount: content.feed.gphoto$commentCount.$t,
+        allowPrints: content.feed.gphoto$allowPrints.$t,
+        allowDownloads: content.feed.gphoto$allowDownloads.$t
+    };
     album.entries = [];
     for (var i = 0; i < content.feed.entry.length; i++) {
     	var entry = content.feed.entry[i];
@@ -45,9 +60,11 @@ function parseAlbum(content) {
     		timestamp: entry.gphoto$timestamp.$t,
     		commentingEnabled: entry.gphoto$commentingEnabled.$t,
     		commentCount: entry.gphoto$commentCount.$t,
-    		streamId: entry.gphoto$streamId.$t,
     		license: entry.gphoto$license
     	};
+        if(entry.gphoto$streamId) {
+            photo.gphoto.streamId = entry.gphoto$streamId.$t;
+        }
     	photo.media = {
     		content: entry.media$group.media$content[0],
     		credit: entry.media$group.media$credit.$t,
@@ -61,8 +78,8 @@ function parseAlbum(content) {
     return album;
 }
 
-function getAlbum(userId, albumId, callback) {
-	http.get(genAlbumUrl(userId, albumId), function(res) {
+function getAlbum(userId, albumId, authKey, callback) {
+	http.get(genAlbumUrl(userId, albumId, authKey), function(res) {
 	    var body = '';
 
 	    res.on('data', function(chunk) {
@@ -71,6 +88,8 @@ function getAlbum(userId, albumId, callback) {
 
 	    res.on('end', function() {
 	    	var content = JSON.parse(body);
+            //console.log("################RETRIEVED#################");
+            //console.log(content);
 	    	var album = parseAlbum(content);
 	    	callback(null, album);
 	    });
@@ -84,7 +103,13 @@ function parseRssUrl(url) {
     var regexp = /http(s){0,1}\:\/\/picasaweb\.google\.com\/data\/feed\/base\/user\/(\d+)\/albumid\/(\d+)\?.*/i;
     var arr = url.match(regexp);
     if (arr != null && arr.length >= 4) {
-        return {userId: arr[2], albumId: arr[3]};
+        var uo = urlLib.parse(url, true);
+        if(uo.query && uo.query["authkey"]) {
+            return {userId: arr[2], albumId: arr[3], authkey: uo.query["authkey"]};
+        } else {
+            console.log("Could not find the authkey query parameter in the url.");
+            return null;
+        }        
     } else {
         return null;
     }
@@ -100,26 +125,34 @@ function findYearInAlbumTitle(title) {
     }
 }
 
+function findAuthorInAlbumTitle(title) {
+    var reg = /.*(\d{4})\s+(.+)$/i;
+    var arr = title.match(reg);
+    if(arr && arr.length >= 3) {
+        return arr[2];
+    } else {
+        return null;
+    }
+}
+
 var ALBUM_TITLE_CATEGORY_RULES = [
     {
         terms: ["nyårsafton", "nyårsbankett", "nyårs", "nyår"], //order is important
         category: "Nyår",
-        subcategory: findYearInAlbumTitle
+        subcategory: findYearInAlbumTitle,
+        author: findAuthorInAlbumTitle
     },
     {
         terms: ["valborgsmässoafton", "valborgs", "valborg"], //order is important
         category: "Valborg",
-        subcategory: findYearInAlbumTitle
+        subcategory: findYearInAlbumTitle,
+        author: findAuthorInAlbumTitle
     },
     {
         terms: ["midsommarafton", "midsommar"], //order is important
         category: "Valborg",
-        subcategory: findYearInAlbumTitle
-    },
-    {
-        terms: ["sardinia", "vacation", "semester"], //TODO REMOVE
-        category: "Semester",
-        subcategory: findYearInAlbumTitle
+        subcategory: findYearInAlbumTitle,
+        author: findAuthorInAlbumTitle
     }
 ];
 
@@ -131,7 +164,21 @@ function parseAlbumTitle(album) {
             if(lcTitle.indexOf(rule.terms[k]) >= 0) {
                 var sub = rule.subcategory(album.title);
                 if(sub != null) {
-                    return {category: rule.category, subcategory: sub};
+                    //console.log("GPhoto User: ", album.gphoto.user);
+                    //console.log("Self Id: ", conf.picasaSelfUserId);
+                    if(album.gphoto.user == conf.picasaSelfUserId) {
+                        //We need to parse the author as well since the photo is "self hosted".
+                        console.log("Self hosted, getting author from title...");
+                        var authorName = rule.author(album.title);
+                        if(authorName) {
+                            return {category: rule.category, subcategory: sub, author: {name: authorName, uri: null}};
+                        } else {
+                            console.log("Could not find author name of ", album.title);
+                            return null;
+                        }
+                    } else {
+                        return {category: rule.category, subcategory: sub};
+                    }
                 } else {
                     console.log("Could not find subcategory of ", album.title);
                     return null;
@@ -143,20 +190,24 @@ function parseAlbumTitle(album) {
     return null;
 }
 
-var SQL_INSERT_ALBUM = "INSERT INTO album(picasa_userId, picasa_albumId, category, subcategory, authorname, authoruri, title, icon, summary) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+var SQL_INSERT_ALBUM = "INSERT INTO album(picasa_userId, picasa_albumId, picasa_authKey, category, subcategory, authorname, authoruri, title, icon, summary) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 exports.addAlbumFromRss = function(rssUrl) {
     console.log("Attempting to get album from RSS URL: ", rssUrl);
     var info = parseRssUrl(rssUrl);
     if(info) {
-        getAlbum(info.userId, info.albumId, function(err, album) {
+        getAlbum(info.userId, info.albumId, info.authkey, function(err, album) {
             if(err) {
                 throw err;
             }
             var categories = parseAlbumTitle(album);
             if(categories) {
                 console.log("Categories: ", categories);
-                var parameters = [info.userId, info.albumId, categories.category, categories.subcategory, album.author.name, album.author.uri, 
+                var author = album.author;
+                if (categories.author) {
+                    author = categories.author;
+                }
+                var parameters = [info.userId, info.albumId, info.authkey, categories.category, categories.subcategory, author.name, author.uri, 
                                   album.title, album.icon, album.summary != null ? summary: ""];
                 console.log("Inserting: ", parameters);
                 connection.query(SQL_INSERT_ALBUM, parameters, function(err, res) {
@@ -164,6 +215,7 @@ exports.addAlbumFromRss = function(rssUrl) {
                         throw err;
                     }
                     console.log("Result: ", res);
+                    connection.end();
                 });
             }
         });
@@ -171,3 +223,38 @@ exports.addAlbumFromRss = function(rssUrl) {
         console.log("ERROR! Unable to get info from rss url: ", rssUrl);
     }
 };
+
+var SQL_GET_CATEGORIES = "SELECT DISTINCT(category) AS category, (SELECT icon FROM album AS b WHERE b.category=a.category LIMIT 1) AS icon FROM album AS a ORDER BY category";
+var SQL_GET_SUBCATEGORIES = "SELECT DISTINCT(subcategory) AS subcategory, (SELECT icon FROM album AS b WHERE b.category=a.category AND a.subcategory=b.subcategory LIMIT 1) AS icon FROM album AS a WHERE category=? ORDER BY subcategory";
+
+exports.categories = function(req, res) {
+    connection.query(SQL_GET_CATEGORIES, function (error, rows, fields) {
+        if (error) {
+            throw error;
+        } else {            
+            res.send(rows);
+        }
+    });
+};
+
+exports.subcategories = function(req, res) {
+    connection.query(SQL_GET_SUBCATEGORIES, [req.params.id], function (error, rows, fields) {
+        if (error) {
+            throw error;
+        } else {
+            if(rows.length > 0) {
+                res.send(rows);
+            } else {
+                res.send(404);
+            }
+        }
+    });
+};
+
+/*getAlbum("u", "a","k", function(err, album){
+    
+    console.log("################PARSED#################");
+    console.log(album);
+    console.log("################AlbumTitle#################");
+    console.log(parseAlbumTitle(album));
+});*/

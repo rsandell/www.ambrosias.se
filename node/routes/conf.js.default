@@ -14,7 +14,7 @@ exports.allowedDomains = new Array( ".*.ambrosias.se",
                                 ".*.ambrosiasorden.org");
 
 exports.album = {
-	picasaAuthKey: 'auth key',
+	picasaSelfUserId: 'userId100000',
 	mysql_conn: {
 		user: "username",
 		password: "password",

@@ -1,7 +1,7 @@
 var express = require('express'),
     recept = require('./routes/recept'),
-    blog = require('./routes/blog'),
     styrelse = require("./routes/styrelse"),
+    album = require("./routes/album"),
     config = require('./routes/conf');
 
 var app = express();
@@ -35,8 +35,9 @@ app.get('/recept-types/:id/recept', recept.findByTypeId);
 app.get('/recept', recept.findAll);
 app.get('/recept/:id', recept.findById);
 app.get('/recept/:id/types', recept.findTypesByReceptId);
-app.get('/blog', blog.getBlog);
 app.get('/styrelse', styrelse.get);
+app.get('/album/categories', album.categories);
+app.get('/album/categories/:id', album.subcategories);
 
 app.listen(3000);
 console.log(new Date() + ' Listening on port 3000...');
