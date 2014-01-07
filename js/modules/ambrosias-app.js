@@ -39,6 +39,10 @@ app.config(function($routeProvider) {
             controller: "AlbumController",
             templateUrl: "views/album.html"
         })
+        .when('/album/:category/:subCategory/:albumId', {
+            controller: "AlbumController",
+            templateUrl: "views/album.html"
+        })
         .when('/dresscode/', {
             controller: "DresscodeController",
             templateUrl: "views/dresscode/index.html"
@@ -146,15 +150,26 @@ app.factory('AlbumFactory', function($resource) {
     return $resource("http://api.ambrosias.se/album/:id", {id: "@id"});
 });
 
-app.controller("AlbumController", function($scope, $routeParams, $location, AlbumCategoriesFactory, AlbumSubCategoriesFactory, AlbumListFactory, AlbumFactory) {
+app.controller("AlbumController", function($scope, $routeParams, $location, $q, AlbumCategoriesFactory, AlbumSubCategoriesFactory, AlbumListFactory, AlbumFactory) {
     $scope.categories = AlbumCategoriesFactory.query();
     $scope.category = $routeParams.category;
     $scope.subCategory = $routeParams.subCategory;
+    $scope.albumId = $routeParams.albumId;
+    $scope.albumPanelMinimized = false;
+    $scope.fullScreenUrl = "";
+    $scope.fullScreenCopyright = "";
     if($scope.category) {
         $scope.subCategories = AlbumSubCategoriesFactory.query({category: $scope.category});
     }
     if($scope.subCategory) {
         $scope.albums = AlbumListFactory.query({category: $scope.category, subcategory: $scope.subCategory});
+    }
+    if($scope.albumId) {
+        $scope.album = AlbumFactory.get({id: $scope.albumId});
+        /*$scope.dbAlbum = album.$promise.then(function(res){
+
+        });*/
+        $scope.albumPanelMinimized = true;
     }
 
     $scope.selectCategory = function(cat) {
@@ -163,7 +178,9 @@ app.controller("AlbumController", function($scope, $routeParams, $location, Albu
     $scope.selectSubCategory = function(cat) {
         $location.path("/album/" + $scope.category + "/" + cat.subcategory);
     };
-
+    $scope.selectAlbum = function(alb) {        
+        $location.path("/album/" + $scope.category + "/" + $scope.subCategory + "/" + alb.id);
+    };
     $scope.showCategories = function() {
         if($scope.category) {
             return false;
@@ -185,6 +202,9 @@ app.controller("AlbumController", function($scope, $routeParams, $location, Albu
             return false;
         }
     };
+    $scope.showActiveAlbum = function() {
+        return $scope.albumId != null;
+    };
     $scope.albumAuthorDisplay = function(alb) {
         if(alb.authoruri) {
             return "<a href='"+alb.authoruri+"' target='_new'>" + alb.authorname + "</a>";
@@ -192,6 +212,83 @@ app.controller("AlbumController", function($scope, $routeParams, $location, Albu
             return alb.authorname;
         }
     };
+    $scope.getCarouselImgUrl = function(photo) {
+        var thumbnails = photo.media.thumbnails;
+        for(var i = 0; i < thumbnails.length; i++) {
+            var thumb = thumbnails[i];
+            if (thumb.height > thumb.width && thumb.height == 512) {
+                return thumb.url;
+            } else if (thumb.width > thumb.height && thumb.width == 720) {
+                return thumb.url;
+            }
+        }
+        return thumbnails[thumbnails.length-1].url;
+    };
+    $scope.cnext = function() {
+        $("#album-carousel").carousel('next');
+    };
+    $scope.cprev = function() {
+        $("#album-carousel").carousel('prev');
+    };
+    $scope.copyrightDisplay = function(photo, albums) {
+        var ppYear = new Date(photo.published).getFullYear();
+        var puYear = new Date(photo.updated).getFullYear();
+        var ptYear = new Date(parseInt(photo.gphoto.timestamp)).getFullYear();
+        var auYear = new Date($scope.album.updated).getFullYear();
+        var atYear = new Date(parseInt($scope.album.gphoto.timestamp)).getFullYear();
+
+        var max = Math.max(ppYear, puYear, ptYear, auYear, atYear);
+        var min = Math.min(ppYear, puYear, ptYear, auYear, atYear);
+
+        var copy = "&copy; ";
+        if (max == min) {
+            copy += max;
+        } else {
+            copy += min + ", " + max;
+        }
+        if(!$scope.dbAlbum) {
+            $scope.dbAlbum = findAlb($scope.albumId, albums);
+        }
+        copy += " " + $scope.albumAuthorDisplay($scope.dbAlbum) + ". ";
+        copy += photo.gphoto.license.name;
+        return copy;
+    };
+    $scope.isHorizontal = function(photo) {
+        return parseInt(photo.gphoto.width) > parseInt(photo.gphoto.height);
+    };
+    $scope.carouselTitle = function(albums) {
+        if(!$scope.dbAlbum) {
+            $scope.dbAlbum = findAlb($scope.albumId, albums);
+        }
+        return $scope.dbAlbum.title + " av " + $scope.albumAuthorDisplay($scope.dbAlbum);
+    }
+    $scope.showFullPhoto = function(photo) {
+        $scope.fullScreenUrl = photo.media.content.url;
+        $scope.fullScreenCopyright = $scope.copyrightDisplay(photo, $scope.albums);
+        $("#album-carousel").carousel("pause");
+        $("#photo-full").modal({
+            backdrop: true,
+            keyboard: true,
+            show: true
+        });
+    };
+    $scope.hideFullPhoto = function() {
+        $("#photo-full").modal('hide');
+    };
+    $scope.thumbnailUrl = function(photo) {
+        var thumbnails = photo.media.thumbnails;
+        for(var i = 0; i < thumbnails.length; i++) {
+            var thumb = thumbnails[i];
+            if (thumb.height == 160 || thumb.width == 160) {
+                return thumb.url;
+            }
+        }
+        return thumbnails[0].url;
+    };
+
+    $('#photo-full').on('hidden.bs.modal', function (e) {
+        $("#album-carousel").carousel("cycle");
+    });  
 });
 
 app.controller("BlogFeedController", function($scope, $filter, BlogPostsFactory, OnePostFactory) {
@@ -298,3 +395,28 @@ app.filter("brevtagg", function(){
         return "<a href='mailto:"+m+"'>"+m+"</a>"
     };
 });
+
+function maxInArr(arr) {
+    var max = arr[0];
+    for (var i = 1; i < arr.length; i++) {
+        max = Math.max(max, arr[i]);
+    }
+    return max;
+}
+
+function minInArr(arr) {
+    var min = arr[0];
+    for (var i = 1; i < arr.length; i++) {
+        min = Math.min(min, arr[i]);
+    }
+    return min;
+}
+
+function findAlb(id, albums) {
+    for(var i = 0; i < albums.length; i++) {
+        if(albums[i].id == id) {
+            return albums[i];
+        }
+    }
+    return null;
+}

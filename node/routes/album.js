@@ -3,7 +3,9 @@ var conf  = require("./conf").album;
 var mysql = require("mysql");
 var urlLib = require("url");
 
-var PICASA_ALBUMS_URL = 'http://picasaweb.google.com/data/feed/api/user/:userId:/albumid/:albumId:?alt=json&authkey=:authkey:';
+var PICASA_ALBUMS_URL = 'http://picasaweb.google.com/data/feed/api/user/:userId:/albumid/:albumId:?alt=json&authkey=:authkey:&thumbsize=:thumbsize:&imgmax=:imgmax:';
+var THUMB_SIZES = "160,512,640,720";
+var IMG_SIZE = "d"
 
 var connection = mysql.createConnection(conf.mysql_conn);
 
@@ -11,6 +13,8 @@ function genAlbumUrl(userId, albumId, authKey) {
 	var temp = PICASA_ALBUMS_URL.replace(":userId:", userId);
 	temp = temp.replace(":albumId:", albumId);
 	temp = temp.replace(":authkey:", authKey);
+    temp = temp.replace(":thumbsize:", THUMB_SIZES);
+    temp = temp.replace(":imgmax:", IMG_SIZE);
 	return temp;
 }
 
