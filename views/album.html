@@ -69,10 +69,8 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-body">
-        <button class="close" ng-click="hideFullPhoto()">&times;</button>
-        <div style="height: 100%; width: 100%">
-        	<img ng-src="{{fullScreenUrl}}" height="100%"/>
-        </div>
+        <button class="close" ng-click="hideFullPhoto()">&times;</button>        
+        <img ng-src="{{fullScreenUrl}}" height="100%"/>
         <div class="copyright"><span ng-bind-html="fullScreenCopyright"></span></div>
       </div>      
     </div><!-- /.modal-content -->
