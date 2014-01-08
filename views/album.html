@@ -5,8 +5,8 @@
 </div>
 <div class="panel panel-default" id="album-category-panel" ng-class="{'album-panel-minimized': albumPanelMinimized}">
 	<div class="panel-body" id="album-categories" ng-cloak="true" ng-show="showCategories()">
-		<div class="thumbnail col-xs-4 col-md-2" ng-repeat="cat in categories" ng-click="selectCategory(cat)">
-			<img src="{{cat.icon}}" alt="{{cat.category}}"/>
+		<div class="thumbnail" ng-repeat="cat in categories" ng-click="selectCategory(cat)">
+			<img ng-src="{{cat.icon}}" alt="{{cat.category}}"/>
 			<div class="caption">
 				<h4>{{cat.category}}</h4>
 			</div>
@@ -14,8 +14,8 @@
 	</div>
 	<div class="panel-body" id="album-sub-categories" ng-cloak="true" ng-show="showSubCategories()">
 	<div class="back-link"><a href="#/album"><span class="glyphicon glyphicon-chevron-left"/> Kategorier</a></div>
-		<div class="thumbnail col-xs-4 col-md-2" ng-repeat="cat in subCategories" ng-click="selectSubCategory(cat)">
-			<img src="{{cat.icon}}" alt="{{cat.subcategory}}"/>
+		<div class="thumbnail" ng-repeat="cat in subCategories" ng-click="selectSubCategory(cat)">
+			<img ng-src="{{cat.icon}}" alt="{{cat.subcategory}}"/>
 			<div class="caption">
 				<h4>{{cat.subcategory}}</h4>
 			</div>
@@ -25,8 +25,8 @@
 		<div class="back-link"><a href="#/album/{{category}}"><span class="glyphicon glyphicon-chevron-left"/> {{category}}</a></div>
 		<div class="maximize-link" ng-show="albumPanelMinimized"><a ng-click="albumPanelMinimized = false;" title="Återställ"><span class="glyphicon glyphicon-chevron-down"/></a></div>
 		<div class="maximize-link" ng-hide="albumPanelMinimized"><a ng-click="albumPanelMinimized = true;" title="Minimera"><span class="glyphicon glyphicon-chevron-up"/></a></div>
-		<div class="thumbnail col-xs-4 col-md-2" ng-repeat="alb in albums" ng-click="selectAlbum(alb)">
-			<img src="{{alb.icon}}" alt="{{alb.title}}"/>
+		<div class="thumbnail" ng-repeat="alb in albums" ng-click="selectAlbum(alb)">
+			<img ng-src="{{alb.icon}}" alt="{{alb.title}}"/>
 			<div class="caption">
 				<h4>{{alb.title}}</h4>
 				<div class="album-summary" ng-if="alb.summary">{{alb.summary}}</div>
@@ -39,13 +39,13 @@
 <div id="album-carousel" class="carousel slide" data-ride="carousel" ng-cloak="true" ng-show="showActiveAlbum()">
   <!-- Indicators -->
   <ol class="carousel-indicators">
-    <li data-target="#album-carousel" ng-repeat="photo in album.entries" data-slide-to="{{$index}}" ng-class="{active: $first}"><img src="{{thumbnailUrl(photo)}}" class="thumbnail"/></li>
+    <li data-target="#album-carousel" ng-repeat="photo in album.entries" data-slide-to="{{$index}}" ng-class="{active: $first}"><img ng-src="{{thumbnailUrl(photo)}}" class="thumbnail"/></li>
   </ol>
 
   <!-- Wrapper for slides -->
   <div class="carousel-inner">
     <div class="item" ng-repeat="photo in album.entries" ng-class="{active: $first, 'photo-horizontal': isHorizontal(photo)}">
-      <img src="{{getCarouselImgUrl(photo)}}" alt="{{photo.title}}" class="photo" ng-click="showFullPhoto(photo)"/>
+      <img ng-src="{{getCarouselImgUrl(photo)}}" alt="{{photo.title}}" class="photo" ng-click="showFullPhoto(photo)"/>
       <div class="carousel-caption">
         <h3>{{photo.title}}</h3>
         <p>{{photo.summary}}</p>         
@@ -71,7 +71,7 @@
       <div class="modal-body">
         <button class="close" ng-click="hideFullPhoto()">&times;</button>
         <div style="height: 100%; width: 100%">
-        	<img src="{{fullScreenUrl}}" height="100%"/>
+        	<img ng-src="{{fullScreenUrl}}" height="100%"/>
         </div>
         <div class="copyright"><span ng-bind-html="fullScreenCopyright"></span></div>
       </div>      

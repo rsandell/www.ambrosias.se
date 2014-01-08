@@ -48,6 +48,12 @@ body {
     padding-right: 15px;
 }
 
+.center {
+     float: none;
+     margin-left: auto;
+     margin-right: auto;
+}
+
 code {
     font-size: 80%;
 }
@@ -246,11 +252,39 @@ h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5 {
     text-align: right;
 }
 
+#album-category-panel .panel-body {
+    margin-left: 8px;
+    /* Internet Explorer 10 */
+    /*display:-ms-flexbox;
+    -ms-flex-pack:center;
+    -ms-flex-align:center;*/
+
+    /* Firefox */
+    /*display:-moz-box;
+    -moz-box-pack:center;
+    -moz-box-align:center;*/
+
+    /* Safari, Opera, and Chrome */
+    /*display:-webkit-box;
+    -webkit-box-pack:center;
+    -webkit-box-align:center;
+    -webkit-box-lines:multiple;
+    -webkit-box-orient:horizontal;*/
+    /* W3C */
+    /*display:box;
+    box-pack:center;
+    box-align:center;
+    box-orient:horizontal;
+    box-lines:multiple;*/
+}
+
 #album-category-panel .thumbnail {
     border: 1px solid #1E439A;
     margin: 3px;
     background-color: rgba(148, 170, 221, 0.75);
     height: 245px;
+    width: 176px;
+    float: left;
 }
 
 #album-category-panel .thumbnail:hover {
@@ -278,6 +312,7 @@ h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5 {
     margin-right: auto;
     margin-left: auto;
     text-align: center;
+    font-size: smaller;
 }
 
 #album-category-panel .back-link {
@@ -423,4 +458,8 @@ h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5 {
 
 #photo-full .modal-content .close:hover {
     cursor: pointer;
+}
+
+.panel-body .center {
+
 }
