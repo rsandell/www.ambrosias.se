@@ -1,4 +1,10 @@
 
+/*
+The MIT License
+
+Copyright (c) 2013,2014 Föreningen Ambrosiasorden, Robert Sandell. All rights reserved.
+*/
+
 var app = angular.module('ambrosiasApp', ['ngRoute', 'ngResource', 'ngSanitize']);
 
 app.config(function($routeProvider) {
@@ -10,6 +16,9 @@ app.config(function($routeProvider) {
         .when('/info', {
             controller: "InfoController",
             templateUrl: "views/info.html"
+        })
+        .when('/about', {
+            templateUrl: "views/about.html"
         })
         .when('/blog', {
             controller: "BlogFeedController",
@@ -41,7 +50,8 @@ app.config(function($routeProvider) {
         })
         .when('/album/:category/:subCategory/:albumId', {
             controller: "AlbumController",
-            templateUrl: "views/album.html"
+            templateUrl: "views/album.html",
+            reloadOnSearch: false
         })
         .when('/dresscode/', {
             controller: "DresscodeController",
@@ -165,10 +175,12 @@ app.controller("AlbumController", function($scope, $routeParams, $location, $q, 
         $scope.albums = AlbumListFactory.query({category: $scope.category, subcategory: $scope.subCategory});
     }
     if($scope.albumId) {
-        $scope.album = AlbumFactory.get({id: $scope.albumId});
-        /*$scope.dbAlbum = album.$promise.then(function(res){
-
-        });*/
+        $scope.album = AlbumFactory.get({id: $scope.albumId}, function(res) {
+            if ($location.search() && $location.search()["photo"]) {
+                //TODO
+            }
+        });
+        
         $scope.albumPanelMinimized = true;
     }
 
@@ -265,6 +277,7 @@ app.controller("AlbumController", function($scope, $routeParams, $location, $q, 
     $scope.showFullPhoto = function(photo) {
         $scope.fullScreenUrl = photo.media.content.url;
         $scope.fullScreenCopyright = $scope.copyrightDisplay(photo, $scope.albums);
+        $location.search("photo", photo.gphoto.id);
         $("#album-carousel").carousel("pause");
         $("#photo-full").modal({
             backdrop: true,
