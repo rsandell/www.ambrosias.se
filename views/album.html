@@ -39,12 +39,14 @@
 <div id="album-carousel" class="carousel slide" data-ride="carousel" ng-cloak="true" ng-show="showActiveAlbum()">
   <!-- Indicators -->
   <ol class="carousel-indicators">
-    <li data-target="#album-carousel" ng-repeat="photo in album.entries" data-slide-to="{{$index}}" ng-class="{active: $first}"><img ng-src="{{thumbnailUrl(photo)}}" class="thumbnail"/></li>
+    <li data-target="#album-carousel" ng-repeat="photo in album.entries" data-slide-to="{{$index}}" ng-class="{active: isPhotoActive($first, photo)}">
+    	<img ng-src="{{thumbnailUrl(photo)}}" class="thumbnail"/>
+    </li>
   </ol>
 
   <!-- Wrapper for slides -->
   <div class="carousel-inner">
-    <div class="item" ng-repeat="photo in album.entries" ng-class="{active: $first, 'photo-horizontal': isHorizontal(photo)}">
+    <div class="item" ng-repeat="photo in album.entries" ng-class="{active: isPhotoActive($first, photo), 'photo-horizontal': isHorizontal(photo)}">
       <img ng-src="{{getCarouselImgUrl(photo)}}" alt="{{photo.title}}" class="photo" ng-click="showFullPhoto(photo)"/>
       <div class="carousel-caption">
         <h3>{{photo.title}}</h3>

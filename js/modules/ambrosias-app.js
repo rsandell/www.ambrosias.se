@@ -168,6 +168,7 @@ app.controller("AlbumController", function($scope, $routeParams, $location, $q, 
     $scope.albumPanelMinimized = false;
     $scope.fullScreenUrl = "";
     $scope.fullScreenCopyright = "";
+    $scope.selectedPhotoId = null;
     if($scope.category) {
         $scope.subCategories = AlbumSubCategoriesFactory.query({category: $scope.category});
     }
@@ -176,8 +177,16 @@ app.controller("AlbumController", function($scope, $routeParams, $location, $q, 
     }
     if($scope.albumId) {
         $scope.album = AlbumFactory.get({id: $scope.albumId}, function(res) {
-            if ($location.search() && $location.search()["photo"]) {
-                //TODO
+            var s = $location.search();
+            if (s && s["photo"] && s["photo"] != "") {
+                $scope.selectedPhotoId = s["photo"];
+                for(var i = 0; i < res.entries.length; i++) {
+                    var p = res.entries[i];
+                    if(p.gphoto.id == $scope.selectedPhotoId) {
+                        $scope.showFullPhoto(p);
+                        break;
+                    }
+                }
             }
         });
         
@@ -288,6 +297,13 @@ app.controller("AlbumController", function($scope, $routeParams, $location, $q, 
     $scope.hideFullPhoto = function() {
         $("#photo-full").modal('hide');
     };
+    $scope.isPhotoActive = function(first, photo) {
+        if($scope.selectedPhotoId) {
+            return $scope.selectedPhotoId == photo.gphoto.id;
+        } else {
+            return first;
+        }
+    };
     $scope.thumbnailUrl = function(photo) {
         var thumbnails = photo.media.thumbnails;
         for(var i = 0; i < thumbnails.length; i++) {
@@ -301,6 +317,8 @@ app.controller("AlbumController", function($scope, $routeParams, $location, $q, 
 
     $('#photo-full').on('hidden.bs.modal', function (e) {
         $("#album-carousel").carousel("cycle");
+        /*$scope.selectedPhotoId = null;
+        $location.search("photo", null).replace();*/
     });  
 });
 
