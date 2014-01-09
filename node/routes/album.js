@@ -27,15 +27,21 @@ var mysql = require("mysql");
 var urlLib = require("url");
 
 var PICASA_ALBUMS_URL = 'http://picasaweb.google.com/data/feed/api/user/:userId:/albumid/:albumId:?alt=json&authkey=:authkey:&thumbsize=:thumbsize:&imgmax=:imgmax:';
+var PICASA_ALBUMS_URL_NO_AUTH = 'http://picasaweb.google.com/data/feed/api/user/:userId:/albumid/:albumId:?alt=json&thumbsize=:thumbsize:&imgmax=:imgmax:';
 var THUMB_SIZES = "160,512,640,720";
 var IMG_SIZE = "d"
 
 var connection = mysql.createConnection(conf.mysql_conn);
 
 function genAlbumUrl(userId, albumId, authKey) {
-	var temp = PICASA_ALBUMS_URL.replace(":userId:", userId);
-	temp = temp.replace(":albumId:", albumId);
-	temp = temp.replace(":authkey:", authKey);
+    var temp = "";
+    if(authKey) {
+        temp = PICASA_ALBUMS_URL.replace(":userId:", userId);
+        temp = temp.replace(":authkey:", authKey);
+    } else {
+        temp = PICASA_ALBUMS_URL_NO_AUTH.replace(":userId:", userId);
+    }	
+	temp = temp.replace(":albumId:", albumId);	
     temp = temp.replace(":thumbsize:", THUMB_SIZES);
     temp = temp.replace(":imgmax:", IMG_SIZE);
 	return temp;
@@ -134,8 +140,8 @@ function parseRssUrl(url) {
         if(uo.query && uo.query["authkey"]) {
             return {userId: arr[2], albumId: arr[3], authkey: uo.query["authkey"]};
         } else {
-            console.log("Could not find the authkey query parameter in the url.");
-            return null;
+            console.log("WARNING Could not find the authkey query parameter in the url. Make sure the visibility is set correctly on the album, attempting anyways since it could be public.");
+            return {userId: arr[2], albumId: arr[3], authkey: null};
         }        
     } else {
         return null;
