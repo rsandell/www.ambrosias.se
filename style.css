@@ -459,3 +459,27 @@ h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5 {
 .panel-body .center {
 
 }
+
+.doc-list li {
+    list-style-type: none;
+}
+
+.doc-list li:before {
+    position: relative;
+    top: 1px;
+    font-family: 'Glyphicons Halflings';
+    color: #9A7B3D;
+    -webkit-font-smoothing: antialiased;
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.doc-list .protokoll:before {
+    content: "\e022";
+}
+
+.doc-list .stadgar:before {
+    content: "\e086";
+}
