@@ -92,6 +92,25 @@ code {
     background-color: #94AADD;
 }
 
+#main-menu .navbar-toggle {
+    background-color: #658ADD;
+    border-color: transparent;
+    padding-top: 1px;
+    padding-bottom: 3px;
+    padding-left: 3px;
+    padding-right: 1px;
+    font-size: x-large;
+}
+
+#main-menu .navbar-toggle .glyphicon {
+    display: block;
+    color: #E6A117;
+}
+
+#main-menu .navbar-toggle:focus {
+    background-color: #658ADD;
+}
+
 .nav-pills > li {
     -webkit-border-radius: 6px;
     -moz-border-radius: 6px;

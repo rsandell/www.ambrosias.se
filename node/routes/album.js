@@ -41,15 +41,16 @@ function genAlbumUrl(userId, albumId, authKey) {
     } else {
         temp = PICASA_ALBUMS_URL_NO_AUTH.replace(":userId:", userId);
     }	
-	temp = temp.replace(":albumId:", albumId);	
+    temp = temp.replace(":albumId:", albumId);	
     temp = temp.replace(":thumbsize:", THUMB_SIZES);
     temp = temp.replace(":imgmax:", IMG_SIZE);
-	return temp;
+    console.log("URL to fetch is " + temp);
+    return temp;
 }
 
 function parseAlbum(content) {
-	var album = {};
-	album.id = content.feed.id.$t;
+    var album = {};
+    album.id = content.feed.id.$t;
     album.title = content.feed.title.$t;
     album.subtitle = content.feed.subtitle.$t;
     album.updated = content.feed.updated.$t;
@@ -67,11 +68,17 @@ function parseAlbum(content) {
         numphotos: content.feed.gphoto$numphotos.$t,
         user: content.feed.gphoto$user.$t,
         nickname: content.feed.gphoto$nickname.$t,
-        commentingEnabled: content.feed.gphoto$commentingEnabled.$t,
-        commentCount: content.feed.gphoto$commentCount.$t,
+        commentingEnabled: false,
+        commentCount: 0,
         allowPrints: content.feed.gphoto$allowPrints.$t,
         allowDownloads: content.feed.gphoto$allowDownloads.$t
     };
+    if (content.feed.gphoto$commentingEnabled) {
+        album.gphoto.commentingEnabled = content.feed.gphoto$commentingEnabled.$t;
+    }
+    if (content.feed.gphoto$commentCount) {
+         album.gphoto.commentCount = content.feed.gphoto$commentCount.$t;
+    }
     album.entries = [];
     for (var i = 0; i < content.feed.entry.length; i++) {
     	var entry = content.feed.entry[i];
