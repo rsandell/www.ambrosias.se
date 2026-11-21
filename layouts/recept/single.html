@@ -1,0 +1,6 @@
+{{ define "main" }}
+{{- $selected := index (.Params.courses | default (slice "")) 0 -}}
+{{- $list := slice -}}
+{{- with site.GetPage (printf "/courses/%s" (replace ($selected | lower) " " "-")) }}{{ $list = .Pages.ByTitle }}{{ end -}}
+{{ partial "recept-layout.html" (dict "selected" $selected "list" $list "recipe" .) }}
+{{ end }}

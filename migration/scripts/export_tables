@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Export every table of the in-scope databases to migration/db/tables/<db>.<table>.json (utf8mb4).
+# Read-only: only SELECTs against the throwaway container started on a copy of api/db.
+# Usage: migration/scripts/export_tables [container-name]
+set -euo pipefail
+C="${1:-ambrosias-db-ro}"
+DBS="ambrosiasrecept ambrosiasalbum2 ambrosiasgallery"
+OUT="$(cd "$(dirname "$0")/.." && pwd)/db/tables"
+mkdir -p "$OUT"
+q() { docker exec -i "$C" mysql --max-allowed-packet=1G --default-character-set=utf8mb4 --batch --raw -N "$@"; }
+
+for db in $DBS; do
+  for t in $(q -e "select table_name from information_schema.tables where table_schema='$db' order by 1"); do
+    # Build JSON_OBJECT('col', `col`, ...) from the column list.
+    obj=$(q -e "select group_concat(concat(quote(column_name), ', \`', column_name, '\`') order by ordinal_position separator ', ') from information_schema.columns where table_schema='$db' and table_name='$t'")
+    q -e "select coalesce(json_arrayagg(json_object($obj)), json_array()) from \`$db\`.\`$t\`" > "$OUT/$db.$t.json"
+    echo "$db.$t -> $(python3 -I -c 'import json,sys;print(len(json.load(open(sys.argv[1],encoding="utf-8"))))' "$OUT/$db.$t.json") rows"
+  done
+done

@@ -1,0 +1,14 @@
+{{ define "main" }}
+<h1>{{ .Title }}</h1>
+{{ .Content }}
+{{ range .Pages.ByDate.Reverse }}
+<article class="post-summary">
+  <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+  <p class="meta">{{ .Date | time.Format "2006-01-02" }}{{ with .Params.author }} · {{ . }}{{ end }}</p>
+  {{ with .Params.summary }}<p>{{ . }}</p>{{ end }}
+</article>
+{{ end }}
+{{ if site.Params.blog.native }}
+<p class="older"><a href="{{ site.Params.blog.external_url }}" rel="noopener">Äldre inlägg på Blogspot</a></p>
+{{ end }}
+{{ end }}

@@ -1,0 +1,72 @@
+baseURL = "https://www.ambrosias.se/"
+title = "Ambrosiasorden"
+locale = "sv"
+defaultContentLanguage = "sv"
+enableRobotsTXT = true
+
+[taxonomies]
+  course = "courses"
+
+[markup.goldmark.renderer]
+  unsafe = false
+
+[params]
+  description = "Ambrosiasorden - Att njuta är att leva"
+  startYear = 2005
+  # Kursordning i receptflikarna (namn som i front matter)
+  courseOrder = ["Förrätt", "Mellanrätt", "Huvudrätt", "Efterrätt", "Till Kaffet"]
+
+  [params.blog]
+    external_url = "https://ambrosiasorden.blogspot.se/"
+    native = false
+
+# Huvudmenyn. "section" används för att markera aktivt menyval.
+[[menus.main]]
+  identifier = "hem"
+  name = "Hem"
+  url = "/"
+  weight = 10
+  [menus.main.params]
+    section = ""
+[[menus.main]]
+  identifier = "info"
+  name = "Info"
+  url = "/info/"
+  weight = 20
+  [menus.main.params]
+    section = "info"
+[[menus.main]]
+  identifier = "recept"
+  name = "Recept"
+  url = "/recept/"
+  weight = 30
+  [menus.main.params]
+    section = "recept"
+[[menus.main]]
+  identifier = "kladkod"
+  name = "Klädkod"
+  url = "/klädkod/"
+  weight = 40
+  [menus.main.params]
+    section = "klädkod"
+[[menus.main]]
+  identifier = "album"
+  name = "Fotoalbum"
+  url = "/album/"
+  weight = 50
+  [menus.main.params]
+    section = "album"
+[[menus.main]]
+  identifier = "blogg"
+  name = "Blogg"
+  url = "/blogg/"        # ersätts av blog.external_url medan blog.native = false
+  weight = 60
+  [menus.main.params]
+    section = "blogg"
+[[menus.main]]
+  identifier = "om"
+  name = "Om"
+  url = "/om/"
+  weight = 70
+  [menus.main.params]
+    section = "om"

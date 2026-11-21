@@ -1,0 +1,27 @@
+{{- $page := . -}}
+<header class="site-header">
+  <div class="bar">
+    <a class="logo" href="{{ "/" | relURL }}" aria-label="Ambrosiasorden, till startsidan">
+      <img src="{{ "img/logo-small.png" | relURL }}" width="120" height="129" alt="Ambrosiasorden">
+    </a>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Meny</button>
+    <nav id="site-nav" aria-label="Huvudmeny">
+      <ul>
+        {{- range site.Menus.main }}
+          {{- $section := .Params.section -}}
+          {{- $current := false -}}
+          {{- if $page.IsHome }}{{ $current = eq .Identifier "hem" }}
+          {{- else if eq $section "recept" }}{{ $current = or (eq $page.Section "recept") (eq $page.Section "courses") }}
+          {{- else if $section }}{{ $current = eq $page.Section $section }}{{ end -}}
+          {{- $url := .URL | relURL -}}
+          {{- $ext := false -}}
+          {{- if and (eq .Identifier "blogg") (not site.Params.blog.native) -}}
+            {{- $url = site.Params.blog.external_url -}}{{- $ext = true -}}
+          {{- end }}
+        <li><a href="{{ $url }}"{{ if $current }} aria-current="page"{{ end }}{{ if $ext }} rel="noopener"{{ end }}>{{ .Name }}</a></li>
+        {{- end }}
+      </ul>
+    </nav>
+    <img class="wordmark" src="{{ "img/ambrosiasorden-gold.png" | relURL }}" width="352" height="34" alt="" aria-hidden="true">
+  </div>
+</header>

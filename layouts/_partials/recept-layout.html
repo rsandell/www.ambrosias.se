@@ -1,0 +1,17 @@
+{{- /* Flikar, lista till vänster och valt recept till höger. dict "selected" "list" (pages) "recipe" (page eller nil) */ -}}
+<h1>Recept</h1>
+{{ partial "recept-nav.html" (dict "selected" .selected) }}
+<div class="recipe-layout">
+  <ul class="recipe-list">
+    {{- $cur := .recipe -}}
+    {{- range .list }}
+    <li><a href="{{ .RelPermalink }}"{{ if and $cur (eq .RelPermalink $cur.RelPermalink) }} aria-current="page"{{ end }}>{{ .Title }}</a></li>
+    {{- end }}
+  </ul>
+  <article class="recipe">
+    {{- with .recipe }}
+    <h2>{{ .Title }}</h2>
+    {{ .Content }}
+    {{- end }}
+  </article>
+</div>

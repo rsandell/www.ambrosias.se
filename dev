@@ -1,0 +1,98 @@
+#!/bin/sh
+# Enda ingången för att förhandsgranska, bygga och underhålla sajten.
+# Kräver bara Docker eller Podman. Se README.md.
+set -eu
+
+cd "$(dirname "$0")"
+IMAGE=ambrosias-site
+ORIGINALS_DIR="${ORIGINALS_DIR:-../gallery}"
+
+if command -v docker >/dev/null 2>&1; then
+  ENGINE=docker
+elif command -v podman >/dev/null 2>&1; then
+  ENGINE=podman
+else
+  echo "Varken docker eller podman hittades. Installera ett av dem." >&2
+  exit 1
+fi
+
+# Kör som aktuell användare så att filer i repot inte ägs av root.
+USER_OPTS="--user $(id -u):$(id -g)"
+# SELinux-värdar behöver :Z på volymer
+Z=""
+if command -v getenforce >/dev/null 2>&1 && [ "$(getenforce)" = Enforcing ]; then Z=",Z"; fi
+if [ "$ENGINE" = podman ]; then
+  USER_OPTS="--userns=keep-id"
+fi
+
+build_image() {
+  if ! $ENGINE image inspect "$IMAGE" >/dev/null 2>&1; then
+    echo "Bygger verktygsbilden (första gången, kan ta en stund) ..." >&2
+    $ENGINE build -t "$IMAGE" .
+  fi
+}
+
+run() {
+  # run [extra engine options] -- command ...
+  OPTS=""
+  while [ "$1" != "--" ]; do OPTS="$OPTS $1"; shift; done
+  shift
+  MOUNTS="-v $PWD:/site:rw$Z"
+  if [ -d "$ORIGINALS_DIR" ]; then
+    MOUNTS="$MOUNTS -v $(cd "$ORIGINALS_DIR" && pwd):/originals:ro$Z"
+  fi
+  # shellcheck disable=SC2086
+  $ENGINE run --rm $USER_OPTS $MOUNTS $OPTS "$IMAGE" "$@"
+}
+
+usage() {
+  cat <<USAGE
+Användning: ./dev <kommando>
+
+  serve [--drafts]          Förhandsvisning på http://localhost:1313
+  build                     Produktionsbygge till public/
+  import-album <zip> [...]  Importera ett album (--category --year --photographer --date)
+  new <sökväg>              Skapa ny sida från mall, t.ex. recept/lyxpizza.md
+  shell                     Öppna ett skal i verktygsbilden
+  rebuild-image             Bygg om verktygsbilden (efter ändrad Hugo-version)
+
+Miljövariabel ORIGINALS_DIR pekar på mappen med original-zipparna (standard ../gallery).
+USAGE
+}
+
+CMD="${1:-}"
+[ $# -gt 0 ] && shift
+
+case "$CMD" in
+  serve)
+    build_image
+    run -p 1313:1313 -- hugo server --bind 0.0.0.0 --baseURL http://localhost:1313/ --appendPort=false "$@"
+    ;;
+  build)
+    build_image
+    run -- hugo --gc --minify "$@"
+    ;;
+  import-album)
+    build_image
+    run -- python3 migration/scripts/import_album "$@"
+    ;;
+  new)
+    build_image
+    run -- hugo new "$@"
+    ;;
+  shell)
+    build_image
+    run -it -- bash
+    ;;
+  rebuild-image)
+    $ENGINE build --no-cache -t "$IMAGE" .
+    ;;
+  ""|-h|--help|help)
+    usage
+    ;;
+  *)
+    echo "Okänt kommando: $CMD" >&2
+    usage >&2
+    exit 1
+    ;;
+esac

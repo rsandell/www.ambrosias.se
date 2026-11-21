@@ -1,1 +1,14 @@
+# Hugo
+public/
+resources/_gen/
+.hugo_build.lock
+
+# Personuppgifter från analysen, får aldrig committas
+migration/db/
+
+# Editorer
 *.sublime-workspace
+
+# Lokala rester från den gamla sajten (finns bara i taggen legacy-angularjs-2014)
+/node/
+/nyår-2004-bosse/

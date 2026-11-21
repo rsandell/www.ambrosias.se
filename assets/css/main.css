@@ -1,0 +1,167 @@
+/*
+  Copyright 2005-2026 Föreningen Ambrosiasorden, Robert Sandell. CC BY-NC 4.0 (se LICENSE-CONTENT.txt).
+  Färgerna är identiteten från den gamla sajten. Definieras en gång här.
+*/
+:root {
+  --blue: #1E439A;
+  --gold: #E6A117;
+  --gold-light: #F6D89C;
+  --blue-mid: #658ADD;
+  --blue-light: #94AADD;
+  --bronze: #9A7B3D;
+  --navy: #2F4067;
+  --ink: #1d2433;
+  --paper: #f4efe2;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { min-height: 100%; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font);
+  font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  line-height: 1.55;
+  color: var(--ink);
+  background-color: var(--paper);
+  background-image: url("../img/creampaper.png");
+}
+@media (min-resolution: 2dppx) {
+  body { background-image: url("../img/creampaper_@2X.png"); background-size: auto; }
+}
+
+/* Vattenmärke: stor blek sköld, centrerad och fast */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: url("../img/bg-logo-005.png") no-repeat center 62% / contain;
+  pointer-events: none;
+}
+
+a { color: var(--blue); }
+a:hover { color: var(--navy); }
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+/* Sidhuvud */
+.site-header {
+  background: var(--blue);
+  border-bottom: 3px solid var(--gold);
+  position: relative;
+  z-index: 2;
+  margin-bottom: 2.5rem;
+}
+.bar {
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: 0.6rem 1rem 0.6rem 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.6rem;
+}
+.logo { display: block; width: 6rem; flex: none; position: relative; z-index: 3; align-self: flex-start; margin-top: -0.4rem; }
+.logo img { display: block; width: 6rem; height: auto; margin-bottom: -3.2rem; filter: drop-shadow(0 2px 2px rgb(0 0 0 / .35)); }
+
+nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.25rem; }
+nav a {
+  display: block;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  color: var(--gold-light);         /* 6.6:1 mot blått */
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-decoration: none;
+}
+nav a:hover { background: var(--navy); color: #fff; }
+nav a[aria-current="page"] {
+  background: var(--navy);
+  color: var(--gold-light);
+  box-shadow: inset 0 -3px 0 var(--gold);
+}
+
+.wordmark { margin-left: auto; max-width: 14rem; height: auto; }
+.menu-toggle {
+  display: none;
+  margin-left: auto;
+  background: var(--navy);
+  color: var(--gold-light);
+  border: 1px solid var(--blue-light);
+  border-radius: 6px;
+  padding: 0.35rem 0.8rem;
+  font: inherit;
+  font-weight: 700;
+}
+
+@media (max-width: 52rem) {
+  .wordmark { display: none; }
+  .bar { flex-wrap: wrap; }
+  .menu-toggle { display: block; }
+  #site-nav { display: none; flex-basis: 100%; }
+  #site-nav.open { display: block; }
+  #site-nav ul { flex-direction: column; }
+  .logo img { margin-bottom: -1.2rem; width: 4rem; }
+  .logo { width: 4rem; }
+}
+
+/* Innehåll */
+.page { flex: 1; width: 100%; max-width: 62rem; margin: 0 auto; padding: 0 1rem 3rem; }
+h1, h2, h3 { color: var(--blue); line-height: 1.2; }
+h1 { font-size: clamp(1.8rem, 1.4rem + 1.6vw, 2.5rem); margin: 0 0 1.25rem; padding-bottom: 0.4rem; border-bottom: 2px solid var(--blue-light); }
+h2 { margin-top: 1.8rem; }
+.lead { font-size: 1.15em; }
+.divider-photo { margin: 2rem 0 0; }
+.divider-photo img { max-width: 100%; height: auto; border: 3px solid var(--blue); border-radius: 4px; display: block; }
+
+/* Recept: flikar, lista till vänster och recept till höger */
+.course-tabs { list-style: none; margin: 0 0 1.5rem; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.course-tabs li { flex: 1 1 8rem; }
+.course-tabs a {
+  display: block;
+  text-align: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  background: rgb(30 67 154 / 0.85);
+  color: var(--gold-light);
+  text-decoration: none;
+  font-weight: 600;
+}
+.course-tabs a:hover { background: var(--navy); }
+.course-tabs a[aria-current="page"] { background: var(--navy); box-shadow: inset 0 -3px 0 var(--gold); }
+.badge { display: inline-block; min-width: 1.5rem; padding: 0 0.4rem; border-radius: 1rem; background: var(--bronze); color: #fff; font-size: 0.8em; }
+
+.recipe-layout { display: grid; grid-template-columns: minmax(10rem, 16rem) 1fr; gap: 2rem; align-items: start; }
+.recipe-list { list-style: none; margin: 0; padding: 0; }
+.recipe-list a { display: block; padding: 0.35rem 0.6rem; border-radius: 6px; text-decoration: none; }
+.recipe-list a:hover { background: rgb(148 170 221 / 0.35); }
+.recipe-list a[aria-current="page"] { background: var(--blue-mid); color: #fff; font-weight: 700; }
+.recipe { background: rgb(246 216 156 / 0.25); padding: 0 1.25rem 1rem; border-radius: 6px; }
+.recipe:empty { display: none; }
+.recipe h2:first-child { margin-top: 1rem; }
+@media (max-width: 40rem) {
+  .recipe-layout { grid-template-columns: 1fr; gap: 1rem; }
+}
+
+.meta { color: var(--navy); font-size: 0.9em; }
+
+/* Sidfot */
+.site-footer {
+  background: var(--blue);
+  border-top: 3px solid var(--gold);
+  color: var(--gold);
+  text-align: right;
+  padding: 0.5rem 1rem;
+}
+.site-footer p { max-width: 62rem; margin: 0 auto; font-size: 0.9rem; }
+.site-footer a { color: var(--gold); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+}
+
+.course-tabs .empty { display: block; text-align: center; padding: 0.5rem 0.75rem; border-radius: 6px; background: rgb(30 67 154 / 0.35); color: var(--navy); }
