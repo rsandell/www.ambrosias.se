@@ -121,15 +121,15 @@ app.config(function($routeProvider) {
 });
 
 app.factory('ReceptTypesFactory', function($resource) {
-    return $resource('http://api.ambrosias.se/recept-types/:id', {id: "@typeId"});
+    return $resource('https://api.ambrosias.se/recept-types/:id', {id: "@typeId"});
 });
 
 app.factory('ReceptOfTypeFactory', function($resource) {
-    return $resource('http://api.ambrosias.se/recept-types/:id/recept', {id: "@typeId"});
+    return $resource('https://api.ambrosias.se/recept-types/:id/recept', {id: "@typeId"});
 });
 
 app.factory('ReceptFactory', function($resource) {
-    return $resource('http://api.ambrosias.se/recept/:id', {id: "@id"});
+    return $resource('https://api.ambrosias.se/recept/:id', {id: "@id"});
 });
 
 app.factory('BlogPostsFactory', function($resource){
@@ -141,23 +141,23 @@ app.factory('OnePostFactory', function($resource){
 });
 
 app.factory('StyrelseFactory', function($resource) {
-    return $resource('http://api.ambrosias.se/styrelse');
+    return $resource('https://api.ambrosias.se/styrelse');
 });
 
 app.factory('AlbumCategoriesFactory', function($resource) {
-    return $resource("http://api.ambrosias.se/album/categories");
+    return $resource("https://api.ambrosias.se/album/categories");
 });
 
 app.factory('AlbumSubCategoriesFactory', function($resource) {
-    return $resource("http://api.ambrosias.se/album/categories/:category", {category: "@category"});
+    return $resource("https://api.ambrosias.se/album/categories/:category", {category: "@category"});
 });
 
 app.factory('AlbumListFactory', function($resource) {
-    return $resource("http://api.ambrosias.se/album/categories/:category/:subcategory", {category: "@category", subcategory: "@subcategory"});
+    return $resource("https://api.ambrosias.se/album/categories/:category/:subcategory", {category: "@category", subcategory: "@subcategory"});
 });
 
 app.factory('AlbumFactory', function($resource) {
-    return $resource("http://api.ambrosias.se/album/:id", {id: "@id"});
+    return $resource("https://api.ambrosias.se/album/:id", {id: "@id"});
 });
 
 app.controller("AlbumController", function($scope, $routeParams, $location, $q, AlbumCategoriesFactory, AlbumSubCategoriesFactory, AlbumListFactory, AlbumFactory) {
