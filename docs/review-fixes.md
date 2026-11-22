@@ -1,6 +1,6 @@
 # Rättningar efter granskningen före WP 6
 
-Gäller `docs/review-before-wp6.md`. Inget är committat ännu (väntar på ägarens OK).
+Gäller `docs/review-before-wp6.md`. Rättningarna är committade i `23bd725` (stod "inget är committat" när dokumentet skrevs).
 
 ## Åtgärdat
 
