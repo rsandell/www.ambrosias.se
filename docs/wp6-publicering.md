@@ -1,6 +1,6 @@
-# WP 6: publicering (pågår)
+# WP 6: publicering (klar 2026-11-22)
 
-Status 2026-11-22. Förs vidare av den som gör push och DNS-bytet.
+Sajten är publicerad på `https://www.ambrosias.se/`. Det som återstår står sist i dokumentet.
 
 ## Gjort
 
@@ -16,6 +16,18 @@ Status 2026-11-22. Förs vidare av den som gör push och DNS-bytet.
 - Dependabot körde sina första uppdateringskontroller direkt efter pushen och kan öppna pull requests. De tidigare säkerhetslarmen gällde den gamla `node/package.json` (express, mysql) och står som åtgärdade.
 - Bildvisaren, bildspelet och helskärm är inte provade på den publicerade sajten (bara hämtning av sidorna). Titta på dem en gång för hand.
 
+## Domänbytet (2026-11-22)
+
+- **Dependabot:** PR #2 (GitHub Actions: checkout 7, configure-pages 6, upload-pages-artifact 5, deploy-pages 5) mergades och deployen gick grönt. PR #1 (Python 3.12 till 3.15 i `Dockerfile`) stängdes **utan merge**: provbygget gick sönder eftersom `Pillow==11.0.0` saknar färdigt paket för Python 3.15. `.github/dependabot.yml` tillåter nu bara patch-uppdateringar av `python`-basbilden. README förklarar hur ett medvetet byte görs.
+- **Anpassad domän** `www.ambrosias.se` sattes med `gh api -X PUT repos/rsandell/www.ambrosias.se/pages -f cname=www.ambrosias.se`. **Sajten måste byggas om efter det** (`gh workflow run pages.yml`): bygget som låg ute var gjort för testadressen och hade `/www.ambrosias.se/` som sökvägsprefix i alla länkar. Arbetsflödet hämtar baseURL från Pages, så den nya körningen fick rätt rot.
+- **DNS hos Loopia** (ägaren ändrade): `www` CNAME till `rsandell.github.io.`, apex A-poster ändrade till GitHubs fyra (`185.199.108-111.153`) och fyra AAAA-poster, plus GitHubs verifierings-TXT (`_github-pages-challenge-rsandell`). **Orört:** MX (Google Workspace), SPF, DKIM, `calendar/docs/mail/sites/start` (ghs.google.com) och jokertecknet `*` (`cern.dyndns.org`, så `api.ambrosias.se` m.fl. går fortfarande till hemservern). Före ändringen: `www` var CNAME till `cern.dyndns.org.` och apex A `85.231.65.47` (för återgång).
+- **HTTPS-certifikatet dröjde.** Efter DNS-ändringen låg certifikatet på "inget" i över en timme (GitHub serverade bara `*.github.io`). Det som löste det var att **ta bort och lägga till den anpassade domänen igen** (`{"cname":null}` och sedan `cname=www.ambrosias.se`). Då gick tillståndet `authorization_created` till `approved` på några minuter. Certifikatet gäller `www.ambrosias.se` och `ambrosias.se` till 2027-02-20 och förnyas av GitHub.
+- **"Enforce HTTPS"** sattes med `{"https_enforced": true}`. Omdirigeringen från `http://` kom inte direkt: det behövdes en av/på-växling och några minuters väntan.
+- **Kontroll:** `https://www.ambrosias.se/` ger 200 med giltigt certifikat, `ambrosias.se` (http och https) skickas vidare till `www`, och startsidan, recept, album, klädkod, info och om fungerar. Okänd adress ger den nya 404-sidan. MX-posterna är oförändrade.
+- **Lokal DNS-cache:** ägarens hemnätverk serverade en tid det gamla svaret (`cern.dyndns.org`) trots att alla publika resolvers och Loopias servrar visade det nya. Det försvann av sig självt. Testa från mobilnät om det händer igen.
+- **Blogger-nyckeln** hittades inte i något konto. Beslut: ignoreras (Blogger API v2 är avvecklat och sidan använder den inte längre). Nyckeln finns kvar i den gamla git-historiken.
+- **Dependabot-inställningar på GitHub:** alerts är påslagna, "security updates", secret scanning och push protection är av.
+
 ## Att veta
 
 - **Testadressen är inte `rsandell.github.io/...`.** GitHub visar `http://rsandell.com/www.ambrosias.se/`, eftersom användarsajten har en egen domän. Arbetsflödet sätter baseURL automatiskt från Pages, så det spelar ingen roll för bygget, men testa på den adress GitHub anger.
@@ -24,8 +36,7 @@ Status 2026-11-22. Förs vidare av den som gör push och DNS-bytet.
 
 ## Kvar
 
-1. ~~Push och första bygge~~ gjort (se ovan). Kvar: titta själv på testadressen (menyn, album med bildspel och helskärm, Drive-länkarna).
-2. Sätt anpassad domän `www.ambrosias.se` i Settings, Pages, och verifiera domänen på kontot. Ändra DNS: `www` som CNAME till `rsandell.github.io`; `ambrosias.se` (apex) får GitHubs A- och AAAA-poster och skickas då vidare till `www`. **Rör inte MX- eller TXT-poster** (styrelsens adresser använder domänen). Kontrollera var MX pekar innan hemservern stängs av.
-3. Slå på "Enforce HTTPS" när certifikatet är utfärdat.
-4. Behåll den gamla servern en tid (återgång = peka DNS tillbaka). Radera inte `api/db/`, den innehåller också de andra databaserna.
-5. Ägarens uppgifter: återkalla den gamla Blogger-nyckeln, slå på Dependabot security alerts, titta på ett album, `/album/nyar/` och vattenmärket för hand.
+1. Titta själv på sajten på riktigt: menyn, ett album med bildspel och helskärm (även på telefon), Drive-länkarna.
+2. Behåll den gamla servern en tid. Radera inte `api/db/` (den har också de andra databaserna). När hemservern tas bort: ta bort jokertecknet `*` och poster som pekar på `cern.dyndns.org`.
+3. Valfritt: slå på secret scanning och push protection (gratis för publika repon) och Dependabot security updates. Granska även om `ambrosias.se` i Google Search Console behövs.
+4. Det som sparats lokalt men inte finns i repot: originalfotona (zip), `migration/db/` och `api/`. Se till att de finns i din backup.
