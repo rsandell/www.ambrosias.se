@@ -5,7 +5,7 @@
     {{- $name := . -}}
     {{- $term := site.GetPage (printf "/courses/%s" (replace ($name | lower) " " "-")) }}
     {{- if $term }}
-  <li><a href="{{ $term.RelPermalink }}"{{ if eq $name $selected }} aria-current="page"{{ end }}>{{ $name }} <span class="badge">{{ len $term.Pages }}</span></a></li>
+  <li><a href="{{ $term.RelPermalink }}" data-course="{{ $name }}"{{ if eq $name $selected }} aria-current="page"{{ end }}>{{ $name }} <span class="badge">{{ len $term.Pages }}</span></a></li>
     {{- else }}
   <li><span class="empty">{{ $name }} <span class="badge">0</span></span></li>
     {{- end }}

@@ -1,6 +1,8 @@
 {{ define "main" }}
-{{- $selected := index (.Params.courses | default (slice "")) 0 -}}
-{{- $list := slice -}}
-{{- with site.GetPage (printf "/courses/%s" (replace ($selected | lower) " " "-")) }}{{ $list = .Pages.ByTitle }}{{ end -}}
-{{ partial "recept-layout.html" (dict "selected" $selected "list" $list "recipe" .) }}
+{{- $lists := slice -}}
+{{- range .Params.courses }}
+  {{- $name := . -}}
+  {{- with site.GetPage (printf "/courses/%s" (replace ($name | lower) " " "-")) }}{{ $lists = $lists | append (dict "course" $name "pages" .Pages.ByTitle) }}{{ end }}
+{{- end -}}
+{{ partial "recept-layout.html" (dict "selected" (index (.Params.courses | default (slice "")) 0) "lists" $lists "recipe" .) }}
 {{ end }}

@@ -1,3 +1,3 @@
 {{ define "main" }}
-{{ partial "recept-layout.html" (dict "selected" "" "list" .Pages.ByTitle "recipe" nil) }}
+{{ partial "recept-layout.html" (dict "selected" "" "lists" (slice (dict "course" "" "pages" .Pages.ByTitle)) "recipe" nil) }}
 {{ end }}

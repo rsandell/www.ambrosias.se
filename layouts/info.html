@@ -30,6 +30,9 @@
 {{- end }}
 
 <h2>Styrelsen</h2>
+{{- with site.Params.boardMail }}
+<p>Hela styrelsen nås på <a href="mailto:{{ . }}">{{ . }}</a>.</p>
+{{- end }}
 <div class="board">
   {{- range hugo.Data.styrelse }}
   <section class="board-member">

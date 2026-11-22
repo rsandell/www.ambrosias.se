@@ -1,13 +1,21 @@
-{{- /* Flikar, lista till vänster och valt recept till höger. dict "selected" "list" (pages) "recipe" (page eller nil) */ -}}
+{{- /* Flikar, lista till vänster och valt recept till höger.
+       dict "selected" <kurs> "lists" (lista av dict "course" "pages") "recipe" (sida eller nil)
+       Ett recept i flera kurser får en lista per kurs. Länkarna bär ?kurs=<namn> så att
+       rätt flik och lista visas (se skriptet längst ner). */ -}}
 <h1>Recept</h1>
 {{ partial "recept-nav.html" (dict "selected" .selected) }}
 <div class="recipe-layout">
-  <ul class="recipe-list">
-    {{- $cur := .recipe -}}
-    {{- range .list }}
-    <li><a href="{{ .RelPermalink }}"{{ if and $cur (eq .RelPermalink $cur.RelPermalink) }} aria-current="page"{{ end }}>{{ .Title }}</a></li>
+  <div class="recipe-lists">
+  {{- $selected := .selected }}{{ $cur := .recipe }}
+  {{- range .lists }}
+    {{- $course := .course }}
+    <ul class="recipe-list" data-course="{{ $course }}"{{ if ne $course $selected }} hidden{{ end }}>
+    {{- range .pages }}
+      <li><a href="{{ .RelPermalink }}{{ if $course }}?kurs={{ $course | urlquery }}{{ end }}"{{ if and $cur (eq .RelPermalink $cur.RelPermalink) }} aria-current="page"{{ end }}>{{ .Title }}</a></li>
     {{- end }}
-  </ul>
+    </ul>
+  {{- end }}
+  </div>
   <article class="recipe">
     {{- with .recipe }}
     <h2>{{ .Title }}</h2>
@@ -15,3 +23,16 @@
     {{- end }}
   </article>
 </div>
+{{- if gt (len .lists) 1 }}
+<script>
+  (function () {
+    var k = new URLSearchParams(location.search).get('kurs');
+    var lists = document.querySelectorAll('.recipe-list');
+    if (!k || !Array.prototype.some.call(lists, function (l) { return l.dataset.course === k; })) return;
+    lists.forEach(function (l) { l.hidden = l.dataset.course !== k; });
+    document.querySelectorAll('.course-tabs a').forEach(function (a) {
+      if (a.dataset.course === k) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    });
+  })();
+</script>
+{{- end }}

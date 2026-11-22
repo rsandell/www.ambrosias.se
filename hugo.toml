@@ -18,6 +18,8 @@ enableRobotsTXT = true
 [params]
   description = "Ambrosiasorden - Att njuta är att leva"
   startYear = 2005
+  # Gemensam adress till hela styrelsen, visas på sidan Info (ta bort raden för att dölja)
+  boardMail = "styrelsen@ambrosias.se"
   # Kursordning i receptflikarna (namn som i front matter)
   courseOrder = ["Förrätt", "Mellanrätt", "Huvudrätt", "Efterrätt", "Till Kaffet"]
 

@@ -17,7 +17,7 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html { min-height: 100%; }
+html { min-height: 100%; scrollbar-gutter: stable; }  /* ingen sidled när rullningslisten dyker upp */
 body {
   margin: 0;
   min-height: 100vh;
@@ -136,11 +136,12 @@ h2 { margin-top: 1.8rem; }
 .badge { display: inline-block; min-width: 1.5rem; padding: 0 0.4rem; border-radius: 1rem; background: var(--bronze); color: #fff; font-size: 0.8em; }
 
 .recipe-layout { display: grid; grid-template-columns: minmax(10rem, 16rem) 1fr; gap: 2rem; align-items: start; }
-.recipe-list { list-style: none; margin: 0; padding: 0; }
-.recipe-list a { display: block; padding: 0.35rem 0.6rem; border-radius: 6px; text-decoration: none; }
+.recipe-list { list-style: none; margin: 0; padding: 0; background: rgb(246 216 156 / 0.75); border: 1px solid var(--blue-light); border-radius: 6px; overflow: hidden; }
+.recipe-list li + li { border-top: 1px solid var(--blue-light); }
+.recipe-list a { display: block; padding: 0.5rem 0.75rem; text-decoration: none; }
 .recipe-list a:hover { background: rgb(148 170 221 / 0.35); }
 .recipe-list a[aria-current="page"] { background: var(--blue-mid); color: #fff; font-weight: 700; }
-.recipe { background: rgb(246 216 156 / 0.25); padding: 0 1.25rem 1rem; border-radius: 6px; }
+.recipe { padding: 0 0 1rem; }
 .recipe:empty { display: none; }
 .recipe h2:first-child { margin-top: 1rem; }
 @media (max-width: 40rem) {
@@ -225,3 +226,4 @@ thead { display: none; }
   pointer-events: none;
 }
 .pswp__album-caption a { color: var(--gold-light); pointer-events: auto; }
+.recipe-list[hidden] { display: none; }

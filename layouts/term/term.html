@@ -2,7 +2,7 @@
 {{ define "scripts" }}{{ if ne .Data.Plural "courses" }}{{ partial "album-assets-scripts.html" . }}{{ end }}{{ end }}
 {{ define "main" }}
 {{- if eq .Data.Plural "courses" }}
-{{ partial "recept-layout.html" (dict "selected" .Title "list" .Pages.ByTitle "recipe" nil) }}
+{{ partial "recept-layout.html" (dict "selected" .Title "lists" (slice (dict "course" .Title "pages" .Pages.ByTitle)) "recipe" nil) }}
 {{- else }}
 {{- /* Album per kategori, år eller fotograf (taxonomierna kategorier, ar, fotografer) */ -}}
 {{- $albums := partial "album-sort.html" .Pages -}}
