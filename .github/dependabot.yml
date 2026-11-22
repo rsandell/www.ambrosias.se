@@ -1,6 +1,10 @@
 # Uppdateringar en gång i månaden, samlade i en enda pull request åt gången.
 # Hugo-versionen står som ARG i Dockerfile och bevakas inte av Dependabot
 # (se README, avsnittet Underhåll). PhotoSwipe är vendorad (assets/vendor/photoswipe/).
+# Python-basbilden uppdateras bara med patch-versioner här. Ett byte av Python-version
+# (3.12 till 3.15 osv.) görs medvetet tillsammans med en ny Pillow, eftersom Pillow är
+# fast versionsnummer i Dockerfile och saknar färdigt paket för nya Python-versioner
+# (testat: python:3.15-slim med Pillow 11.0.0 går inte att bygga).
 version: 2
 updates:
   - package-ecosystem: "github-actions"
@@ -14,6 +18,9 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
+    ignore:
+      - dependency-name: "python"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
     groups:
       alla:
         patterns: ["*"]
