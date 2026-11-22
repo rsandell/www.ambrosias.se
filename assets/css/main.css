@@ -227,3 +227,19 @@ thead { display: none; }
 }
 .pswp__album-caption a { color: var(--gold-light); pointer-events: auto; }
 .recipe-list[hidden] { display: none; }
+
+/* Bildspel och helskärm i bildvisaren */
+.pswp__button[hidden] { display: none; }
+.pswp__button--bildspel-intervall {
+  width: auto; min-width: 44px; padding: 0 .5rem; color: #fff;
+  font: 600 .95rem/60px system-ui, sans-serif; text-shadow: 0 0 2px rgba(0,0,0,.6);
+}
+.pswp__button--bildspel-play, .pswp__button--helskarm { color: #fff; }
+.pswp__button--bildspel-play .pswp__icn, .pswp__button--helskarm .pswp__icn {
+  filter: drop-shadow(0 0 1px rgba(0,0,0,.6));
+}
+.pswp__button:focus-visible { outline: 2px solid var(--gold-light); outline-offset: -4px; }
+.pswp__sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; margin: -1px; padding: 0; border: 0;
+}

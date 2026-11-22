@@ -35,7 +35,7 @@ Skrivet efter WP 2 (recept och statiska sidor) och WP 3 (album).
 ## Sådant som kan överraska
 
 - **Repot är undermappen `www.ambrosias.se/`**, inte projektmappen. `migration/db/` och `../gallery/` ligger utanför repot och ska aldrig dit. `convert_recipes` läser därför `../migration/db/tables` som standard.
-- **Inget är committat.** WP 2 och 3 ligger som ändringar i arbetskopian. Granska med `git status`, och lägg inte till allt blint. `public/`, `resources/_gen/` och `__pycache__/` är ignorerade.
+- **Allt är committat på `master`** (WP 2 och 3 i commit `73c254d`, granskningsrättningar i `bf34d7d`). Inget är pushat. `public/`, `resources/_gen/` och `__pycache__/` är ignorerade.
 - **Hugo-flaggan för utkast är `-D`**, inte `--drafts`. `./dev serve --drafts` stämmer med `hugo server`, men `./dev build --drafts` ger fel.
 - **`./dev import-album` kräver att zipens sökväg saknar mellanslag** om zipen ligger utanför `ORIGINALS_DIR`. Samma begränsning finns i `./dev` för repots egen sökväg (`-v $PWD:/site`).
 - **Gamla zip-namn:** `Nyårsafton ...-Bobby.zip` ger kategori Nyår, fotograf Robert Sandell och titeln "Nyårsafton 2011". Övriga zippar ger titeln av filnamnet. Titeln kan ändras med `--title`.
