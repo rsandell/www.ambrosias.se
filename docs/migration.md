@@ -3,6 +3,14 @@
 Status: analysis and export only. No Hugo site has been created. This document is the main instruction for the build session.
 Everything in `migration/db/` is git-ignored (`.gitignore` at the project root) and must never be committed.
 
+## 0. How we work (decided after the analysis)
+
+- **Single source of truth:** this file in the repository (`docs/migration.md`). The copy in the parent folder outside the repository is only a pointer and must not be edited.
+- **Branch:** all work is committed directly on `master`. The old local branch `hugo` is stale and unused.
+- **No push to GitHub** until the site works end to end (builds with `./dev build`, looks right, all work packages done or consciously deferred). Pushing, enabling Pages and the DNS switch are confirmed with the owner (work package 6). The tag `legacy-angularjs-2014` is already created locally and is pushed together with `master`.
+- **One decisions document per stage:** every work package (and sub-stage) writes `docs/<stage>.md` (for example `docs/wp2-wp3-decisions.md`, `docs/wp4-logo.md`) listing, briefly, **what deviates from this plan, what was decided differently and why, and what is missing or deferred**. This file (the plan) is not rewritten to hide deviations; the stage documents are the record. A new stage starts by reading this file and all existing stage documents.
+- **Commit per work package** (small, with a clear message), so nothing exists only in an uncommitted working tree.
+
 ## 1. Technical summary of the current site
 
 | Part | What it is |
