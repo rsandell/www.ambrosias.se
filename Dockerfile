@@ -1,6 +1,6 @@
 # Verktygsbilden för Ambrosiasorden: Hugo (fast version) + Python 3 med Pillow.
 # Fungerar oförändrat med både docker och podman.
-FROM python:3.12-slim
+FROM python:3.15-slim
 
 # Hugo-versionen anges på ETT ställe, här. Ändra och bygg om bilden för att uppdatera.
 ARG HUGO_VERSION=0.170.1
