@@ -59,6 +59,12 @@ import PhotoSwipeLightbox from '../vendor/photoswipe/photoswipe-lightbox.esm.min
     var pswp = lightbox.pswp;
     var playing = false, timer = null, live = null, playBtn = null, intBtn = null, fsBtn = null;
     var many = function () { return pswp.getNumItems() > 1; };
+
+    // PhotoSwipes next/prev/pilar byter bild utan rörelse (bara svep animeras).
+    // Låt dem glida med samma korta fjäderrörelse som ett svep. Ingen rörelse vid reducerad rörelse.
+    pswp.goTo = function (i) {
+      pswp.mainScroll.moveIndexBy(pswp.getLoopedIndex(i) - pswp.potentialIndex, !reduced);
+    };
     var say = function (t) { if (live) { live.textContent = ''; setTimeout(function () { live.textContent = t; }, 50); } };
 
     var clear = function () { if (timer) { clearTimeout(timer); timer = null; } };

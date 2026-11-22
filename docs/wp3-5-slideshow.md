@@ -29,3 +29,7 @@ Kontroll 1 till 8 i planen kördes mot Nyår 2005 eAx (55 bilder) och den kombin
 - Ingen test på en riktig telefon. Svep testades som pekardragning med mus (ett försök med syntetisk touch via CDP flyttade inte bilden alls), och ingen test med skärmläsare.
 - Helskärm i iPhone Safari saknas i plattformen (knappen döljs). Inte testat där.
 - README-avsnittet "Bildvisaren" skrivs i WP 5 (README finns inte än) och ska nämna knapparna och Space.
+
+## Tillägg: glidande bildbyte
+
+PhotoSwipes `next()`/`prev()` (pilar, knappar, bildspelet) byter bild utan rörelse, bara svep animeras. `album.js` ersätter därför `pswp.goTo` med `mainScroll.moveIndexBy(diff, true)`, samma korta fjäderrörelse (cirka 0,2 s) som vid svep. Av vid `prefers-reduced-motion`. Kontrollerat: rörelse mitt i bytet, ingen rörelse med reducerad rörelse, loop och bildspel oförändrade.
