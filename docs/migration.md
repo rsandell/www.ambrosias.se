@@ -277,6 +277,40 @@ Initial content (taken from the current `info.html`): Stadgar 2.0 (Drive), Årsm
 5. **The gold wordmark** "Ambrosiasorden" is separate (`img/ambrosiasorden-gold.xcf` and PNG in the old repo, not in `design/`). It is a script font, one colour: either keep it as a large PNG (2x, 3x) or trace it with Potrace, whichever looks right. If a vector version of the lettering exists in a PSD, send it.
 6. If an SVG ever turns out unsatisfactory, the fallback is the large PNG and Hugo image processing, as described earlier. The logo is not a blocker for the migration.
 
+### WP 3.5 specification: slideshow (autoplay) and fullscreen in the photo lightbox
+
+**Why:** WP 3 delivered previous/next and the combined views, but no automatic slideshow. This item adds it. It is planned here only; another agent implements it.
+
+**Where:** the lightbox opened from an album page and from the combined views (category/year pages, "Visa alla bilder"), so one implementation covers both. Files expected to change: `assets/js/album.js` and `assets/css/main.css`. The vendored PhotoSwipe 5.4.4 has **no built-in autoplay**, so use PhotoSwipe's own mechanism for custom toolbar elements (`ui.registerElement`) and its `next()` action. **No new dependency** and no change to the vendored library.
+
+**Behaviour (decided):**
+- **Off by default, user-started only.** Never starts by itself. A play/pause button in the toolbar (and the **Space** key) starts and pauses it. The button shows its state (`aria-pressed`) and has Swedish labels ("Starta bildspel", "Pausa bildspel").
+- **Interval:** default 5 seconds, selectable 3, 5 or 8 seconds through a small button in the toolbar that cycles through the values and shows the current one. Remember the choice for the visitor in `localStorage` (wrapped in try/catch; the feature must work if storage is blocked).
+- **Loops:** after the last photo it continues with the first one (PhotoSwipe `loop: true`). It applies to the whole opened gallery, which in the combined views spans several albums.
+- **Pauses when the visitor interacts:** arrow keys, swipe, a click on a thumbnail or the previous/next buttons (any change of photo that the slideshow did not cause itself), and **zoom** (zooming in pauses it). It does not resume by itself; the visitor presses play again.
+- **Hidden browser tab:** the timer stops while the tab is hidden and continues when it is visible again, but only if the slideshow was playing.
+- **Closing the lightbox** stops the slideshow and leaves fullscreen.
+- **Fullscreen button** (standard Fullscreen API on the lightbox element, with the `webkit` prefix as fallback). Hide the button where the browser does not support it (for example iPhone Safari). It shows its state and updates when the visitor leaves fullscreen with Esc.
+- **Only one photo in the gallery:** hide the play and interval buttons.
+
+**Accessibility (required):**
+- The slideshow is a user-started moving element and must be possible to stop at any time (WCAG 2.2.2). All new buttons are real `<button>` elements, reachable by keyboard, with visible focus and text alternatives.
+- Announce "Bildspel startat", "Bildspel pausat" and the interval changes to screen readers through a polite live region (visually hidden).
+- `prefers-reduced-motion` is respected: animations stay off (already the case) and the slideshow still never starts on its own. Do not shorten the interval below 3 seconds.
+- Keep the existing caption (album, photographer, position) updating on every automatic change.
+
+**Acceptance checks (headless Chrome with Playwright, run through the project container or the scratchpad, plus one manual look on a phone if possible):**
+1. Open an album, the lightbox shows play, interval and fullscreen buttons; nothing moves for 10 seconds without pressing play.
+2. Play with a 3-second interval advances automatically; the counter and caption follow.
+3. ArrowRight, a swipe and a zoom each pause it; Space starts and pauses it; it stays paused afterwards.
+4. Starting on the last photo, it continues to the first photo.
+5. The interval choice survives closing and reopening the lightbox and a page reload; with `localStorage` disabled nothing breaks.
+6. Works the same from a combined view over several albums.
+7. Fullscreen enters and leaves, and the button state follows Esc. In a browser without support the button is absent.
+8. No console errors; the build (`./dev build`) is green and `album.js` stays small (target under about 6 KB minified).
+
+**Deliverable:** commit on `master`, write `docs/wp3-5-slideshow.md` (deviations, choices, anything not done), add the new buttons and Space shortcut to the "Lägg till album" or a short "Bildvisaren" part of the README when WP 5 writes it. Note for that agent: `docs/wp2-wp3-decisions.md` still says "Inget är committat", which is no longer true; correct it in the same commit.
+
 ### Containerised tooling (Docker or Podman)
 
 **Decided:** everything needed to preview, build and maintain the site runs in a container. A webadmin needs only **Docker or Podman**, not Hugo, Python, Pillow, ImageMagick or Node. Local installs are optional and not documented as the main route.
@@ -432,6 +466,7 @@ All design and content decisions are made and written in sections 1 to 8. Rules 
 | 1 | **Skeleton:** Hugo site in the repo root, `Dockerfile`, `./dev`, GitHub Actions workflow, `.gitignore`, config (menu, `blog.*`, `originals` not used), archetypes, base layout and theme prototype of header, footer, background and a recipe page, compared with the screenshots | 0 | Everything else builds on this |
 | 2 | **Recipes and static pages:** convert the 6 recipes (script plus owner review), info page text, Om page (rewritten technology list and credits), 17 klädkod pages, board data and document list as data files, Blogg link and draft blog section | 1 | Section 4 |
 | 3 | **Albums:** write `import_album` (resize, never upscale), import the 17 zips, album/year/category pages, combined photo views, PhotoSwipe lightbox, draft placeholders for the two deferred albums. Measure the total size of the resized photos on one album first | 1 | Section 4 and 5. The heaviest package |
+| 3.5 | **Slideshow and fullscreen in the lightbox** (added after WP 3 was finished): see "WP 3.5 specification" below | 3 | Small, frontend only. Stage document `docs/wp3-5-slideshow.md` |
 | 4 | **Logo SVG** (independent trial): finish `migration/logo-trial/psd_to_svg.py`, optimise, derive favicon and watermark | none | Hand the result to WP 1/3 as files; the site works with the PNG until then |
 | 5 | **README (Swedish), licences, third-party notices, Dependabot config**; test every README command | 1 to 3 | Section 7 and 8 |
 | 6 | **Publish:** Pages with Actions, `CNAME`, test on the default GitHub address, DNS switch (apex redirects to `www`), keep the old server up for a while | 1 to 5, owner | Owner decides when |
