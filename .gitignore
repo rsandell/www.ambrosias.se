@@ -12,3 +12,4 @@ migration/db/
 # Lokala rester från den gamla sajten (finns bara i taggen legacy-angularjs-2014)
 /node/
 /nyår-2004-bosse/
+__pycache__/

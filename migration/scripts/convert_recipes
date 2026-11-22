@@ -1,0 +1,157 @@
+#!/usr/bin/env python3
+"""Konverterar de 6 recepten från databasexporten till Markdown under content/recept/.
+
+Användning (från repots rot):
+    python3 migration/scripts/convert_recipes [tabellmapp] [målmapp]
+Standard: ../migration/db/tables  ->  content/recept
+(migration/db/ är git-ignorerad och ligger utanför repot, den får aldrig committas.)
+
+Texten skrivs inte om: bara formatet städas (entiteter, &nbsp;, dubbla mellanslag,
+<br>/<p> blir listor och stycken). Skriptet skriver en rapport per recept där orden
+före och efter jämförs, så att en tappad rad syns direkt. Varje fil ska ändå läsas
+igenom av en människa innan publicering.
+"""
+import json
+import os
+import re
+import sys
+import html as htmllib
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import htmlmd
+
+TABLES = sys.argv[1] if len(sys.argv) > 1 else "../migration/db/tables"
+DST = sys.argv[2] if len(sys.argv) > 2 else "content/recept"
+
+
+def table(name):
+    return json.load(open(os.path.join(TABLES, "ambrosiasrecept.%s.json" % name), encoding="utf-8"))
+
+
+def slugify(s):
+    s = s.lower().replace("å", "a").replace("ä", "a").replace("ö", "o").replace("é", "e")
+    return re.sub(r"[^a-z0-9]+", "-", s).strip("-")
+
+
+def lines_of(fragment):
+    """Alla rader i ett HTML-fragment (<br> och <p> delar rader), utan tomma."""
+    out = []
+    for b in htmlmd.parse(fragment or ""):
+        if b[0] == "p":
+            out.extend(htmlmd.inline_lines(b[1]))
+    return out
+
+
+def blocks_of(fragment):
+    """Lista med stycken, varje stycke är en lista rader. Tomma stycken (&nbsp;) hoppas över."""
+    out = []
+    for b in htmlmd.parse(fragment or ""):
+        if b[0] == "p":
+            lines = htmlmd.inline_lines(b[1])
+            if lines:
+                out.append(lines)
+    return out
+
+
+def bullet_list(lines):
+    """Punktlista. En rad som bara är fetstil (t.ex. 'Till Garnering') blir egen rubrikrad."""
+    out, cur = [], []
+    for l in lines:
+        if re.fullmatch(r"\*\*[^*]+\*\*", l):
+            if cur:
+                out.append("\n".join(cur)); cur = []
+            out.append(l)
+        else:
+            cur.append("- " + l)
+    if cur:
+        out.append("\n".join(cur))
+    return "\n\n".join(out)
+
+
+def method(fragment):
+    """Tillredning: stycken med minst 3 rader blir numrerad lista, övriga stycken."""
+    parts = []
+    for lines in blocks_of(fragment):
+        if len(lines) >= 3:
+            parts.append("\n".join("%d. %s" % (i + 1, l) for i, l in enumerate(lines)))
+        else:
+            parts.append("\\\n".join(lines))
+    return "\n\n".join(parts)
+
+
+def drinks(fragment):
+    lines = lines_of(fragment)
+    if len(lines) >= 2:
+        return "\n".join("- " + l for l in lines)
+    return "\n".join(lines)
+
+
+def pretext(fragment):
+    return "\n\n".join("\\\n".join(l) for l in blocks_of(fragment))
+
+
+def plain(fragment):
+    t = re.sub(r"<[^>]+>", " ", fragment or "")
+    return htmlmd.norm_ws(htmllib.unescape(t)).split()
+
+
+def md_words(md):
+    t = md.replace("\\\n", " ")
+    t = re.sub(r"(?m)^(?:\d+\.|-) ", "", t)
+    t = re.sub(r"(?m)^## (Ingredienser|Tillredning|Dryckesförslag)$", "", t)
+    t = t.replace("*", " ")
+    return htmlmd.norm_ws(t).split()
+
+
+def front_matter(r, courses):
+    pre = " ".join(plain(r["pretext"]))
+    fm = ['title: "%s"' % htmlmd.norm_ws(r["name"]).strip(),
+          'slug: "%s"' % slugify(r["name"]),
+          "legacy_id: %d" % r["id"],
+          "courses: [%s]" % ", ".join('"%s"' % c for c in courses)]
+    m = re.search(r"[Tt]ill (\d+) ?(?:st\.?|personer)", pre) or re.search(r"(\d+) personer", pre)
+    if m:
+        fm.append('servings: "%s personer"' % m.group(1))
+    m = re.search(r"[Tt]id (\d+) ?min(?: ?\+ ?\d+ ?\w+)?", pre)
+    if m:
+        t = re.sub(r"(\d)min", r"\1 min", m.group(0)[4:])
+        fm.append('time: "%s"' % t)
+    fm.append("draft: false")
+    return "---\n" + "\n".join(fm) + "\n---\n\n"
+
+
+def main():
+    types = {t["id"]: t["name"] for t in table("type")}
+    links = {}
+    for l in table("recept_types"):
+        links.setdefault(l["recept_id"], []).append(l["type_id"])
+    os.makedirs(DST, exist_ok=True)
+    ok = True
+    for r in table("recept"):
+        courses = [types[t] for t in sorted(links.get(r["id"], []))]
+        parts = []
+        pre = pretext(r["pretext"])
+        if pre:
+            parts.append(pre)
+        parts.append("## Ingredienser\n" + bullet_list(lines_of(r["ingredienser"])))
+        parts.append("## Tillredning\n" + method(r["tillredning"]))
+        dr = drinks(r["dryck"])
+        if dr:
+            parts.append("## Dryckesförslag\n" + dr)
+        body = "\n\n".join(parts) + "\n"
+        slug = slugify(r["name"])
+        with open(os.path.join(DST, slug + ".md"), "w", encoding="utf-8") as f:
+            f.write(front_matter(r, courses) + body)
+        before = plain(r["pretext"]) + plain(r["ingredienser"]) + plain(r["tillredning"]) + plain(r["dryck"])
+        after = md_words(body)
+        same = before == after
+        ok &= same
+        print("%-28s %3d ord  %s" % (slug + ".md", len(before), "OK" if same else "SKILLNAD"))
+        if not same:
+            import difflib
+            for l in difflib.unified_diff(before, after, "före", "efter", lineterm="", n=2):
+                print("   ", l)
+    sys.exit(0 if ok else 1)
+
+
+main()

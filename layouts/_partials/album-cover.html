@@ -1,0 +1,8 @@
+{{- /* Omslagsbild (miniatyr) för ett album: dict url, w, h, eller tomt. */ -}}
+{{- $p := . -}}
+{{- $name := $p.Params.cover | default "001.jpg" -}}
+{{- $img := $p.Resources.GetMatch $name -}}
+{{- with $p.Resources.GetMatch (printf "thumbs/%s" $name) }}{{ $img = . }}{{ end -}}
+{{- $out := dict -}}
+{{- with $img }}{{ $out = dict "url" .RelPermalink "w" .Width "h" .Height }}{{ end -}}
+{{- return $out -}}

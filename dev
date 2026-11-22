@@ -74,7 +74,20 @@ case "$CMD" in
     ;;
   import-album)
     build_image
-    run -- python3 migration/scripts/import_album "$@"
+    [ $# -ge 1 ] || { echo "Användning: ./dev import-album <zip> [flaggor]" >&2; exit 1; }
+    ZIP="$1"; shift
+    # Zippen finns på värden; i containern ligger den under /originals (skrivskyddat) eller /zips.
+    [ -f "$ZIP" ] || { [ -f "$ORIGINALS_DIR/$ZIP" ] && ZIP="$ORIGINALS_DIR/$ZIP"; } || { echo "Hittar inte zipfilen: $ZIP" >&2; exit 1; }
+    ZDIR=$(cd "$(dirname "$ZIP")" && pwd)
+    ZNAME=$(basename "$ZIP")
+    ODIR=""
+    [ -d "$ORIGINALS_DIR" ] && ODIR=$(cd "$ORIGINALS_DIR" && pwd)
+    if [ "$ZDIR" = "$ODIR" ]; then
+      run -- python3 migration/scripts/import_album "/originals/$ZNAME" "$@"
+    else
+      case "$ZDIR" in *" "*) echo "Flytta zipfilen till en sökväg utan mellanslag, eller lägg den i $ORIGINALS_DIR." >&2; exit 1;; esac
+      run -v "$ZDIR:/zips:ro$Z" -- python3 migration/scripts/import_album "/zips/$ZNAME" "$@"
+    fi
     ;;
   new)
     build_image

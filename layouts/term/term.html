@@ -1,3 +1,21 @@
+{{ define "head" }}{{ if ne .Data.Plural "courses" }}{{ partial "album-assets-head.html" . }}{{ end }}{{ end }}
+{{ define "scripts" }}{{ if ne .Data.Plural "courses" }}{{ partial "album-assets-scripts.html" . }}{{ end }}{{ end }}
 {{ define "main" }}
+{{- if eq .Data.Plural "courses" }}
 {{ partial "recept-layout.html" (dict "selected" .Title "list" .Pages.ByTitle "recipe" nil) }}
+{{- else }}
+{{- /* Album per kategori, år eller fotograf (taxonomierna kategorier, ar, fotografer) */ -}}
+{{- $albums := partial "album-sort.html" .Pages -}}
+{{- $label := dict "kategorier" "Kategori" "ar" "År" "fotografer" "Fotograf" -}}
+{{- $panels := slice -}}
+{{- range $albums -}}
+  {{- $panels = $panels | append (dict "href" .RelPermalink "title" .Title "sub" (printf "%s · %d bilder" .Params.photographer (int .Params.photo_count)) "cover" (partial "album-cover.html" .)) -}}
+{{- end }}
+<p class="back"><a href="{{ "album/" | relURL }}">&larr; Fotoalbum</a></p>
+<h1>{{ index $label .Data.Plural }}: {{ .Title }}</h1>
+{{ .Content }}
+{{ partial "album-panels.html" $panels }}
+{{ partial "album-showall.html" (partial "album-count.html" $albums) }}
+{{ partial "album-data.html" $albums }}
+{{- end }}
 {{ end }}

@@ -1,0 +1,20 @@
+{{ define "head" }}{{ partial "album-assets-head.html" . }}{{ end }}
+{{ define "scripts" }}{{ partial "album-assets-scripts.html" . }}{{ end }}
+{{ define "main" }}
+{{- $photos := partial "album-photos.html" . -}}
+<p class="back"><a href="{{ .Parent.RelPermalink }}">&larr; {{ .Parent.Parent.Title }} {{ .Parent.Title }}</a></p>
+<h1>{{ .Title }}</h1>
+<p class="meta">Foto: {{ range .GetTerms "fotografer" }}<a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>{{ else }}{{ .Params.photographer }}{{ end }}
+  · {{ len $photos }} bilder · {{ .Date | time.Format "2006-01-02" }}</p>
+{{ .Content }}
+{{- if $photos }}
+<ul class="photo-grid">
+  {{- range $i, $p := $photos }}
+  <li><a href="{{ $p.src }}" data-pswp-index="{{ $i }}"><img src="{{ $p.thumb }}" width="{{ $p.tw }}" height="{{ $p.th }}" alt="{{ $.Title }}, bild {{ add $i 1 }}" loading="lazy"></a></li>
+  {{- end }}
+</ul>
+{{ partial "album-data.html" (slice .) }}
+{{- else }}
+<p>Bilderna till det här albumet saknas just nu.</p>
+{{- end }}
+{{ end }}

@@ -165,3 +165,63 @@ h2 { margin-top: 1.8rem; }
 }
 
 .course-tabs .empty { display: block; text-align: center; padding: 0.5rem 0.75rem; border-radius: 6px; background: rgb(30 67 154 / 0.35); color: var(--navy); }
+
+/* Info, Om och klädkod */
+.lead { font-size: 1.15em; }
+.source, .kalla { text-align: right; font-size: 0.85em; font-style: italic; }
+.back { margin: 0 0 0.5rem; font-size: 0.95em; }
+dl dt { font-weight: 700; }
+dl dd { margin: 0 0 0.5rem 0; }
+.doc-list { list-style: none; padding: 0; margin: 0 0 1rem; }
+.doc-list li { padding: 0.2rem 0 0.2rem 1.6rem; position: relative; }
+.doc-list li::before { position: absolute; left: 0; color: var(--bronze); font-weight: 700; }
+.doc-list li.stadgar::before { content: "§"; }
+.doc-list li.protokoll::before { content: "¶"; }
+.doc-list li.annat::before { content: "•"; }
+.doc-note { color: var(--navy); font-size: 0.8em; }
+.board { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 1rem 2rem; }
+.board-member h3 { margin: 0; }
+.board-title { margin: 0 0 0.3rem; font-style: italic; }
+.board-member dl { display: grid; grid-template-columns: max-content 1fr; gap: 0 0.75rem; margin: 0; }
+.board-member dd { margin: 0; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+td, th { text-align: left; vertical-align: top; padding: 0.4rem 0.6rem; border-top: 1px solid var(--blue-light); }
+thead { display: none; }
+
+/* Fotoalbum */
+.panels { list-style: none; margin: 0 0 1.5rem; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); gap: 1rem; }
+.panel a {
+  display: flex; flex-direction: column; height: 100%;
+  background: rgb(148 170 221 / 0.35);
+  border: 1px solid var(--blue-light);
+  border-radius: 6px; overflow: hidden;
+  text-decoration: none; color: var(--ink);
+}
+.panel a:hover { background: rgb(148 170 221 / 0.6); }
+.panel img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; background: var(--blue-light); }
+.panel-title { padding: 0.5rem 0.75rem 0; font-weight: 700; color: var(--blue); }
+.panel-sub { padding: 0 0.75rem 0.6rem; font-size: 0.9em; color: var(--navy); }
+.panel-title:last-child { padding-bottom: 0.6rem; }
+
+.photo-grid { list-style: none; margin: 1rem 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: 0.5rem; }
+.photo-grid a { display: block; border-radius: 4px; overflow: hidden; background: var(--blue-light); }
+.photo-grid img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; }
+.photo-grid a:hover img { opacity: 0.85; }
+
+.btn {
+  font: inherit; font-weight: 700; cursor: pointer;
+  background: var(--blue); color: var(--gold-light);
+  border: 0; border-radius: 6px; padding: 0.5rem 1rem;
+}
+.btn:hover { background: var(--navy); }
+.show-all { margin: 0 0 1.5rem; }
+.term-list { list-style: none; padding: 0; columns: 14rem; }
+.term-list li { padding: 0.2rem 0; }
+
+.pswp__album-caption {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 0.6rem 1rem; text-align: center; color: #fff; font-size: 0.95rem;
+  background: linear-gradient(transparent, rgb(0 0 0 / 0.55));
+  pointer-events: none;
+}
+.pswp__album-caption a { color: var(--gold-light); pointer-events: auto; }

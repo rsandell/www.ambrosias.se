@@ -1,0 +1,4 @@
+{{- /* Antal bilder i en lista med album. */ -}}
+{{- $n := 0 -}}
+{{- range . }}{{ $n = add $n (int .Params.photo_count) }}{{ end -}}
+{{- return $n -}}

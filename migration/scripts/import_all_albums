@@ -1,0 +1,28 @@
+#!/bin/sh
+# Importerar de 17 befintliga albumen (migrationen). Körs från repots rot:
+#   migration/scripts/import_all_albums
+# Zipfilerna hämtas från ORIGINALS_DIR (standard ../gallery). Använder ./dev, så Docker/Podman räcker.
+# Siffran är id i gamla databasen (legacy_id, bara för spårbarhet).
+set -eu
+cd "$(dirname "$0")/../.."
+while IFS='|' read -r id zip; do
+  ./dev import-album "$zip" --legacy-id "$id"
+done <<'LIST'
+15|Nyår 2004 Bosse.zip
+7|Nyår 2005 eAx.zip
+14|Nyår 2005 Mannenmedspannen.zip
+6|Nyår 2005 Mark.zip
+12|Nyår 2005 Sarchen.zip
+13|Nyår 2005 Straus.zip
+11|Nyår 2006 Anna.zip
+8|Nyår 2007 Mogge.zip
+10|Valborg 2007 Joel & Igge.zip
+9|Valborg 2007 Mogge.zip
+4|Nyårsafton 2011-Bobby.zip
+5|Valborg 2012-Bobby.zip
+17|Nyårsafton 2012-Bobby.zip
+18|Nyårsafton 2013-Bobby.zip
+20|Valborg 2014-Bobby.zip
+21|Nyårsafton 2014-Bobby.zip
+16|Valborg 2007-Bobby.zip
+LIST

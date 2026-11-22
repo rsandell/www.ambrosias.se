@@ -1,0 +1,29 @@
+# Dokumentlistan på sidan Info.
+# Varje post har title, type (stadgar | protokoll | annat), year (valfritt)
+# och exakt ETT av:
+#   url:  extern länk (Drive, Docs, var som helst), används som den är
+#   file: PDF under static/, t.ex. "doc/Årsmöte_Ambrosiasorden_2021.pdf"
+# Nyaste året visas först inom varje typ.
+# Ny version av stadgarna: lägg till en ny post (nytt year). Pensionera den gamla
+# genom att ändra dess type till annat eller lägga till "archived: true"
+# (då hamnar den under "Äldre versioner").
+# Drive/Docs-länkarna måste vara delade som "alla med länken".
+- title: "Stadgar 2.0"
+  type: stadgar
+  url: "https://drive.google.com/file/d/1PWH9oPhh8GLJMLfTds_Il0P8zImw55t0/view?usp=sharing"
+- title: "Årsmötesprotokoll 2021"
+  type: protokoll
+  year: 2021
+  file: "doc/Årsmöte_Ambrosiasorden_2021.pdf"
+- title: "Årsmötesprotokoll 2013"
+  type: protokoll
+  year: 2013
+  url: "https://docs.google.com/document/d/1IzZhkWAMFpVFa65JC8Tzqpaf_ZKLLMg-91ce9CmbniM/edit?usp=sharing"
+- title: "Årsmötesprotokoll 2012"
+  type: protokoll
+  year: 2012
+  url: "https://docs.google.com/document/d/1pBqeKgaKBoWndtQTdsFdzs0hJWVQzoNj5417srJzO-0/edit?usp=sharing"
+- title: "Årsmötesprotokoll 2011"
+  type: protokoll
+  year: 2011
+  url: "https://docs.google.com/document/d/1URx8LgC40J6iFS-P4yVLOacHq_jufljlZNSf2SHqhlU/edit?hl=sv"

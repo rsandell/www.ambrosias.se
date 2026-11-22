@@ -1,4 +1,13 @@
 {{ define "main" }}
 <h1>{{ .Title }}</h1>
+{{- if eq .Data.Plural "courses" }}
 {{ partial "recept-nav.html" (dict "selected" "") }}
+{{- else }}
+<p class="back"><a href="{{ "album/" | relURL }}">&larr; Fotoalbum</a></p>
+<ul class="term-list">
+  {{- range .Data.Terms.Alphabetical }}
+  <li><a href="{{ .Page.RelPermalink }}">{{ .Page.Title }}</a> <span class="badge">{{ .Count }}</span></li>
+  {{- end }}
+</ul>
+{{- end }}
 {{ end }}

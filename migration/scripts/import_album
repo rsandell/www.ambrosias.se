@@ -1,0 +1,369 @@
+#!/usr/bin/env python3
+"""Importerar ett fotoalbum (zip) till Hugo-sajten.
+
+Normalt startas skriptet via  ./dev import-album "<zip>" [flaggor]
+(det körs då i verktygsbilden, inget behöver installeras lokalt).
+
+Bibliotek: Python 3 + Pillow (ImageMagick behövs inte).
+
+Vad skriptet gör
+  * läser zipfilen (ändrar den aldrig) och avvisar osäkra sökvägar (.., absoluta)
+  * tar bara med JPEG-bilder. Andra filer (t.ex. en AVI) hoppas över med varning
+  * skriver webbversioner: längsta sidan högst 1600 px, ALDRIG uppskalning,
+    orienteringen tillämpad, metadata (EXIF/GPS/XMP/IPTC) borttagen.
+    Om en bild redan är 1600 px eller mindre och omkodning inte gör den mindre,
+    kopieras originalet (med metadata borttagen utan omkodning).
+    En fil blir aldrig större än originalet.
+  * skriver miniatyrer (längsta sidan ca 400 px, aldrig uppskalning) i thumbs/.
+    En bild som är mindre än 400 px är sin egen miniatyr (ingen thumbs-fil)
+  * skriver  content/album/<kategori>/<år>/<fotograf>/index.md  med bilderna i samma mapp
+    (001.jpg, 002.jpg ... i ursprunglig ordning; originalnamnen finns i `photos:`)
+  * kan köras om: samma zip ger samma resultat. Tar bort `draft` så albumet publiceras.
+
+Zipnamn som känns igen:  "<Kategori> <År> <Fotograf>.zip"  och  "<Titel>-Bobby.zip"
+(Nyårsafton = Nyår; Bobby = Robert Sandell). Annars ange --category --year --photographer.
+Datum: Nyår 30 dec, Valborg 30 apr. Midsommar och övriga kräver --date ÅÅÅÅ-MM-DD.
+"""
+import argparse
+import io
+import os
+import re
+import struct
+import sys
+import unicodedata
+import zipfile
+from concurrent.futures import ProcessPoolExecutor
+
+from PIL import Image, ImageOps
+
+WEB_EDGE = 1600
+THUMB_EDGE = 400
+Q_WEB = 82
+Q_THUMB = 78
+MAX_ENTRY_BYTES = 200 * 1024 * 1024
+
+CATEGORIES = {"nyår": "Nyår", "nyårsafton": "Nyår", "valborg": "Valborg", "midsommar": "Midsommar"}
+DATE_RULES = {"Nyår": (12, 30), "Valborg": (4, 30)}
+CATEGORY_WEIGHT = {"Nyår": 10, "Valborg": 20, "Midsommar": 30}
+PHOTOGRAPHER_ALIASES = {"bobby": "Robert Sandell"}
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+
+
+# ---------------------------------------------------------------- hjälpfunktioner
+def nfc(s):
+    return unicodedata.normalize("NFC", s)
+
+
+def slugify(s):
+    s = nfc(s).lower()
+    for a, b in (("å", "a"), ("ä", "a"), ("ö", "o"), ("é", "e"), ("ü", "u")):
+        s = s.replace(a, b)
+    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode()
+    return re.sub(r"[^a-z0-9]+", "-", s).strip("-")
+
+
+def natural_key(s):
+    return [int(t) if t.isdigit() else t for t in re.split(r"(\d+)", nfc(s).casefold())]
+
+
+def parse_name(zip_name):
+    """Zipnamn -> (titel, kategori, år, fotograf) där okända delar är None."""
+    stem = nfc(os.path.splitext(os.path.basename(zip_name))[0]).strip()
+    photographer = None
+    m = re.match(r"^(.+?)\s*-\s*(Bobby)$", stem, re.I)
+    if m:
+        stem, photographer = m.group(1).strip(), PHOTOGRAPHER_ALIASES["bobby"]
+    m = re.match(r"^(Nyårsafton|Nyår|Valborg|Midsommar)\s+(\d{4})(?:\s+(.+))?$", stem, re.I)
+    if not m:
+        return stem, None, None, photographer
+    cat = CATEGORIES[m.group(1).lower()]
+    rest = m.group(3)
+    if rest and not photographer:
+        photographer = PHOTOGRAPHER_ALIASES.get(rest.strip().lower(), rest.strip())
+    return stem, cat, int(m.group(2)), photographer
+
+
+def unsafe(name):
+    n = name.replace("\\", "/")
+    return n.startswith("/") or re.match(r"^[A-Za-z]:", n) or ".." in n.split("/") or "\x00" in n
+
+
+def is_junk(name):
+    base = os.path.basename(name.rstrip("/"))
+    return (name.endswith("/") or name.startswith("__MACOSX/") or base.startswith(".")
+            or base.lower() in ("thumbs.db", "desktop.ini"))
+
+
+def strip_jpeg(data):
+    """Tar bort EXIF/XMP (APP1), IPTC (APP13) och kommentarer (COM) utan omkodning."""
+    if data[:2] != b"\xff\xd8":
+        return None
+    out = bytearray(b"\xff\xd8")
+    i, n = 2, len(data)
+    while i < n:
+        if data[i] != 0xFF:
+            return None
+        while i < n and data[i] == 0xFF:
+            i += 1
+        if i >= n:
+            return None
+        marker = data[i]
+        i += 1
+        if marker == 0xDA:                       # SOS: resten är bilddata
+            out += b"\xff\xda" + data[i:]
+            return bytes(out)
+        if marker == 0x01 or 0xD0 <= marker <= 0xD8:
+            out += bytes([0xFF, marker])
+            continue
+        if i + 2 > n:
+            return None
+        (length,) = struct.unpack(">H", data[i:i + 2])
+        if marker not in (0xE1, 0xED, 0xFE):
+            out += bytes([0xFF, marker]) + data[i:i + length]
+        i += length
+    return None
+
+
+def write_if_changed(path, data):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    try:
+        with open(path, "rb") as f:
+            if f.read() == data:
+                return
+    except FileNotFoundError:
+        pass
+    tmp = path + ".tmp"
+    with open(tmp, "wb") as f:
+        f.write(data)
+    os.replace(tmp, path)
+
+
+def encode(im, quality, icc):
+    buf = io.BytesIO()
+    kw = {"quality": quality, "optimize": True, "progressive": True}
+    if icc:
+        kw["icc_profile"] = icc
+    im.save(buf, "JPEG", **kw)
+    return buf.getvalue()
+
+
+# ---------------------------------------------------------------- bildbearbetning (egen process)
+def process_photo(job):
+    zpath, entry, idx, outdir, web_edge, q_web, thumb_edge, q_thumb = job
+    with zipfile.ZipFile(zpath) as zf:
+        data = zf.read(entry)
+    n_in = len(data)
+    im = Image.open(io.BytesIO(data))
+    if im.format != "JPEG":
+        raise ValueError("inte JPEG: %s" % entry)
+    orient = im.getexif().get(0x0112, 1)
+    icc = im.info.get("icc_profile")
+    w0, h0 = im.size
+    need_resize = max(w0, h0) > web_edge
+    if need_resize:
+        scale = web_edge / max(w0, h0)
+        im.draft("RGB", (max(1, round(w0 * scale)), max(1, round(h0 * scale))))
+    im = ImageOps.exif_transpose(im)
+    if im.mode not in ("RGB", "L"):
+        im = im.convert("RGB")
+    if need_resize:
+        im.thumbnail((web_edge, web_edge), Image.LANCZOS)    # aldrig uppskalning
+    encoded = encode(im, q_web, icc)
+    original = strip_jpeg(data) if orient == 1 else None
+    mode = "omkodad"
+    if orient == 1 and original is not None and len(encoded) >= len(original) and not need_resize:
+        web, (w, h), mode = original, (w0, h0), "original"
+    elif orient == 1 and original is not None and len(encoded) >= n_in:
+        web, (w, h), mode = original, (w0, h0), "original"   # sällsynt: omkodning blev större
+    else:
+        web, (w, h) = encoded, im.size
+        if need_resize:
+            mode = "förminskad"
+    name = "%03d.jpg" % idx
+    write_if_changed(os.path.join(outdir, name), web)
+    thumb_bytes = None
+    tw = th = None
+    if max(w, h) > thumb_edge:
+        t = im.copy()
+        t.thumbnail((thumb_edge, thumb_edge), Image.LANCZOS)
+        tb = encode(t, q_thumb, icc)
+        write_if_changed(os.path.join(outdir, "thumbs", name), tb)
+        thumb_bytes, (tw, th) = len(tb), t.size
+    return {"idx": idx, "orig": os.path.basename(entry), "w": w, "h": h, "tw": tw, "th": th,
+            "n_in": n_in, "n_web": len(web), "n_thumb": thumb_bytes, "mode": mode}
+
+
+# ---------------------------------------------------------------- Markdown
+def q(s):
+    import json
+    return json.dumps(s, ensure_ascii=False)
+
+
+def read_old(path):
+    """Värden som ska bevaras vid omkörning (manuellt satta)."""
+    old = {}
+    try:
+        text = open(path, encoding="utf-8").read()
+    except FileNotFoundError:
+        return old
+    m = re.match(r"^---\n(.*?)\n---", text, re.S)
+    if not m:
+        return old
+    for key in ("date", "cover", "legacy_id", "title"):
+        mm = re.search(r"(?m)^%s:\s*(.+?)\s*$" % key, m.group(1))
+        if mm:
+            old[key] = mm.group(1).strip().strip('"')
+    return old
+
+
+def front_matter(meta):
+    fm = [
+        "title: " + q(meta["title"]),
+        "category: " + q(meta["category"]),
+        "year: %d" % meta["year"],
+        "date: " + meta["date"],
+        "photographer: " + q(meta["photographer"]),
+    ]
+    if meta.get("legacy_id"):
+        fm.append("legacy_id: %s" % meta["legacy_id"])
+    fm += [
+        "photo_count: %d" % meta["photo_count"],
+        "cover: " + q(meta["cover"]),
+        "original_zip: " + q(meta["original_zip"]),
+        "# Taxonomier (skapas av importskriptet, ändra inte för hand):",
+        "kategorier: [%s]" % q(meta["category"]),
+        "ar: [%s]" % q(str(meta["year"])),
+        "fotografer: [%s]" % q(meta["photographer"]),
+        "# Originalnamnen. Rad nr N hör till bilden NNN.jpg",
+        "photos:",
+    ]
+    fm += ["  - " + q(n) for n in meta["photos"]]
+    return "---\n" + "\n".join(fm) + "\n---\n"
+
+
+def ensure_section(path, title, weight):
+    """Skapar _index.md för kategori/år om den saknas och tar bort draft: true."""
+    if os.path.exists(path):
+        text = open(path, encoding="utf-8").read()
+        new = re.sub(r"(?m)^draft:.*\n", "", text)
+        if new != text:
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(new)
+        return
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("---\ntitle: %s\nweight: %d\n---\n" % (q(title), weight))
+
+
+def human(n):
+    return "%.1f MB" % (n / 1048576)
+
+
+# ---------------------------------------------------------------- huvudprogram
+def main():
+    ap = argparse.ArgumentParser(description="Importera ett fotoalbum (zip) till Hugo-sajten.")
+    ap.add_argument("zip")
+    ap.add_argument("--category", help="Nyår | Valborg | Midsommar")
+    ap.add_argument("--year", type=int)
+    ap.add_argument("--photographer")
+    ap.add_argument("--date", help="ÅÅÅÅ-MM-DD (krävs för Midsommar och andra kategorier)")
+    ap.add_argument("--title", help="albumets titel (standard: zipnamnet utan -Bobby)")
+    ap.add_argument("--legacy-id", type=int, help="id i gamla databasen (bara för spårbarhet)")
+    ap.add_argument("--content-dir", default=os.path.join(REPO_ROOT, "content", "album"))
+    ap.add_argument("--max-edge", type=int, default=WEB_EDGE)
+    ap.add_argument("--quality", type=int, default=Q_WEB)
+    ap.add_argument("--jobs", type=int, default=os.cpu_count() or 2)
+    a = ap.parse_args()
+
+    title, cat, year, phot = parse_name(a.zip)
+    if a.category:
+        cat = CATEGORIES.get(a.category.lower(), a.category)
+    year = a.year or year
+    phot = PHOTOGRAPHER_ALIASES.get((a.photographer or "").lower(), a.photographer) if a.photographer else phot
+    title = a.title or title
+    if not (cat and year and phot):
+        sys.exit("Kan inte avgöra kategori/år/fotograf från zipnamnet. Ange --category --year --photographer.")
+
+    cat_slug, phot_slug = slugify(cat), slugify(phot)
+    bundle = os.path.join(a.content_dir, cat_slug, str(year), phot_slug)
+    index_md = os.path.join(bundle, "index.md")
+    old = read_old(index_md)
+
+    if a.date:
+        date = a.date
+    elif old.get("date"):
+        date = old["date"]
+    elif cat in DATE_RULES:
+        date = "%04d-%02d-%02d" % ((year,) + DATE_RULES[cat])
+    else:
+        sys.exit("Kategorin %s saknar datumregel: ange --date ÅÅÅÅ-MM-DD." % cat)
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", date):
+        sys.exit("Ogiltigt datum: %s" % date)
+
+    with zipfile.ZipFile(a.zip) as zf:
+        infos = zf.infolist()
+        for i in infos:
+            if unsafe(i.filename):
+                sys.exit("Osäker sökväg i zipfilen, avbryter: %r" % i.filename)
+        images, skipped = [], []
+        for i in infos:
+            if is_junk(i.filename):
+                continue
+            if i.file_size > MAX_ENTRY_BYTES:
+                sys.exit("För stor fil i zipfilen: %r" % i.filename)
+            if i.filename.lower().endswith((".jpg", ".jpeg")):
+                images.append(i.filename)
+            else:
+                skipped.append(i.filename)
+    for s in skipped:
+        print("VARNING: hoppar över %r (inte en JPEG-bild)" % s, file=sys.stderr)
+    if not images:
+        sys.exit("Inga bilder i zipfilen.")
+    images.sort(key=lambda n: natural_key(os.path.basename(n)))
+
+    jobs = [(a.zip, e, n + 1, bundle, a.max_edge, a.quality, THUMB_EDGE, Q_THUMB) for n, e in enumerate(images)]
+    os.makedirs(bundle, exist_ok=True)
+    with ProcessPoolExecutor(max_workers=max(1, a.jobs)) as ex:
+        results = sorted(ex.map(process_photo, jobs, chunksize=4), key=lambda r: r["idx"])
+
+    # städa bort filer från en tidigare körning som inte längre finns
+    keep = {"%03d.jpg" % r["idx"] for r in results}
+    keep_t = {"%03d.jpg" % r["idx"] for r in results if r["n_thumb"]}
+    for d, names in ((bundle, keep), (os.path.join(bundle, "thumbs"), keep_t)):
+        if os.path.isdir(d):
+            for f in os.listdir(d):
+                if re.fullmatch(r"\d{3}\.jpg", f) and f not in names:
+                    os.remove(os.path.join(d, f))
+
+    cover = old.get("cover") if old.get("cover") in keep else "001.jpg"
+    meta = {
+        "title": title, "category": cat, "year": year, "date": date, "photographer": phot,
+        "legacy_id": a.legacy_id or old.get("legacy_id"), "photo_count": len(results),
+        "cover": cover, "original_zip": nfc(os.path.basename(a.zip)),
+        "photos": [r["orig"] for r in results],
+    }
+    with open(index_md, "w", encoding="utf-8") as f:
+        f.write(front_matter(meta))
+
+    ensure_section(os.path.join(a.content_dir, "_index.md"), "Fotoalbum", 0)
+    ensure_section(os.path.join(a.content_dir, cat_slug, "_index.md"), cat, CATEGORY_WEIGHT.get(cat, 90))
+    ensure_section(os.path.join(a.content_dir, cat_slug, str(year), "_index.md"), str(year), year)
+
+    n_in = sum(r["n_in"] for r in results)
+    n_web = sum(r["n_web"] for r in results)
+    n_thumb = sum(r["n_thumb"] or 0 for r in results)
+    modes = {}
+    for r in results:
+        modes[r["mode"]] = modes.get(r["mode"], 0) + 1
+    print("%s -> %s" % (os.path.basename(a.zip), os.path.relpath(bundle, REPO_ROOT)))
+    print("  bilder: %d (hoppade över: %d)  %s" % (len(results), len(skipped),
+          ", ".join("%s %d" % (k, v) for k, v in sorted(modes.items()))))
+    print("  före: %s   efter: %s webb + %s miniatyrer = %s  (%.0f%%)" % (
+        human(n_in), human(n_web), human(n_thumb), human(n_web + n_thumb),
+        100.0 * (n_web + n_thumb) / n_in))
+
+
+if __name__ == "__main__":
+    main()

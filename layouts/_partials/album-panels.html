@@ -1,0 +1,11 @@
+{{- /* Miniatyrpaneler. Anropas med lista av dict: href, title, sub, cover (dict url, w, h) */ -}}
+<ul class="panels">
+  {{- range . }}
+  {{- $c := .cover }}
+  <li class="panel"><a href="{{ .href }}">
+    {{- if $c.url }}<img src="{{ $c.url }}" width="{{ $c.w }}" height="{{ $c.h }}" alt="" loading="lazy">{{ end -}}
+    <span class="panel-title">{{ .title }}</span>
+    {{- with .sub }}<span class="panel-sub">{{ . }}</span>{{ end -}}
+  </a></li>
+  {{- end }}
+</ul>

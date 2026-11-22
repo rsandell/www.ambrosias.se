@@ -10,9 +10,11 @@
         {{- range site.Menus.main }}
           {{- $section := .Params.section -}}
           {{- $current := false -}}
+          {{- $path := $page.Path -}}
           {{- if $page.IsHome }}{{ $current = eq .Identifier "hem" }}
           {{- else if eq $section "recept" }}{{ $current = or (eq $page.Section "recept") (eq $page.Section "courses") }}
-          {{- else if $section }}{{ $current = eq $page.Section $section }}{{ end -}}
+          {{- else if eq $section "album" }}{{ $current = or (eq $page.Section "album") (in (slice "kategorier" "ar" "fotografer") $page.Section) }}
+          {{- else if $section }}{{ $current = or (eq $path (printf "/%s" $section)) (hasPrefix $path (printf "/%s/" $section)) }}{{ end -}}
           {{- $url := .URL | relURL -}}
           {{- $ext := false -}}
           {{- if and (eq .Identifier "blogg") (not site.Params.blog.native) -}}

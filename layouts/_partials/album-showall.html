@@ -1,0 +1,4 @@
+{{- /* Knapp "Visa alla bilder". Anropas med antal bilder. JS visar knappen (hidden tills dess). */ -}}
+{{- if gt . 0 }}
+<p class="show-all"><button type="button" class="btn" data-pswp-open="0" hidden>Visa alla bilder ({{ . }})</button></p>
+{{- end }}

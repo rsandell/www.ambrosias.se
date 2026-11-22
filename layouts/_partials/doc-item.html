@@ -1,0 +1,7 @@
+{{- /* En post i dokumentlistan: data/dokument.yaml. Exakt en av url eller file. */ -}}
+{{- if and .url .file }}{{ errorf "dokument.yaml: %q har både url och file" .title }}{{ end -}}
+{{- if not (or .url .file) }}{{ errorf "dokument.yaml: %q saknar url eller file" .title }}{{ end -}}
+<li class="{{ .type }}">
+  {{- if .url }}<a href="{{ .url }}" rel="noopener">{{ .title }}</a> <span class="doc-note">(extern)</span>
+  {{- else }}<a href="{{ .file | relURL }}">{{ .title }}</a> <span class="doc-note">(PDF)</span>{{ end -}}
+</li>

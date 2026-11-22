@@ -1,0 +1,49 @@
+{{ define "main" }}
+<h1>{{ .Title }}</h1>
+{{ .Content }}
+
+{{- /* Dokument: grupperade efter typ, nyaste år först. Se data/dokument.yaml */ -}}
+{{- $docs := hugo.Data.dokument | default slice -}}
+{{- $groups := slice
+      (dict "type" "stadgar" "label" "Stadgar")
+      (dict "type" "protokoll" "label" "Protokoll")
+      (dict "type" "annat" "label" "Övrigt") -}}
+<h2>Dokument</h2>
+{{- range $groups }}
+  {{- $type := .type -}}
+  {{- $items := slice -}}
+  {{- range sort (where $docs "type" $type) "year" "desc" }}{{ if not .archived }}{{ $items = $items | append . }}{{ end }}{{ end -}}
+  {{- if $items }}
+<h3>{{ .label }}</h3>
+<ul class="doc-list">
+    {{- range $items }}{{ partial "doc-item.html" . }}{{ end }}
+</ul>
+  {{- end }}
+{{- end }}
+{{- $old := slice -}}
+{{- range sort (where $docs "archived" true) "year" "desc" }}{{ $old = $old | append . }}{{ end -}}
+{{- if $old }}
+<h3>Äldre versioner</h3>
+<ul class="doc-list">
+  {{- range $old }}{{ partial "doc-item.html" . }}{{ end }}
+</ul>
+{{- end }}
+
+<h2>Styrelsen</h2>
+<div class="board">
+  {{- range hugo.Data.styrelse }}
+  <section class="board-member">
+    <h3>{{ .name }}</h3>
+    <p class="board-title">{{ .title }}</p>
+    <dl>
+      <dt>Mail</dt>
+      <dd><a href="mailto:{{ .mail }}">{{ .mail }}</a></dd>
+      {{- with .replacer }}{{ if .name }}
+      <dt>Ersättare</dt>
+      <dd>{{ .name }}{{ with .mail }}<br><a href="mailto:{{ . }}">{{ . }}</a>{{ end }}</dd>
+      {{- end }}{{ end }}
+    </dl>
+  </section>
+  {{- end }}
+</div>
+{{ end }}

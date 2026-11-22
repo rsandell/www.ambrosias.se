@@ -8,6 +8,7 @@
   {{ $css := resources.Get "css/main.css" | resources.Minify | resources.Fingerprint }}
   <link rel="stylesheet" href="{{ $css.RelPermalink }}">
   <link rel="icon" href="{{ "img/logo-small.png" | relURL }}">
+  {{ block "head" . }}{{ end }}
 </head>
 <body>
   {{ partial "header.html" . }}
@@ -15,6 +16,7 @@
     {{ block "main" . }}{{ end }}
   </main>
   {{ partial "footer.html" . }}
+  {{ block "scripts" . }}{{ end }}
   <script>
     (function () {
       var b = document.querySelector('.menu-toggle'), n = document.getElementById('site-nav');

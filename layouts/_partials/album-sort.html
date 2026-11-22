@@ -1,0 +1,2 @@
+{{- /* Albumordning för bildspel: år (datum), sedan fotograf. */ -}}
+{{- return (sort (sort . "Params.photographer") "Date") -}}

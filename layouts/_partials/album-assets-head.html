@@ -1,0 +1,2 @@
+{{ $css := resources.Get "vendor/photoswipe/photoswipe.css" | resources.Minify | resources.Fingerprint }}
+<link rel="stylesheet" href="{{ $css.RelPermalink }}">

@@ -1,0 +1,30 @@
+{{ define "head" }}{{ partial "album-assets-head.html" . }}{{ end }}
+{{ define "scripts" }}{{ partial "album-assets-scripts.html" . }}{{ end }}
+{{ define "main" }}
+{{- /* Nivå efter sökvägen: /album = 1 (kategorier), /album/nyar = 2 (år), /album/nyar/2005 = 3 (album) */ -}}
+{{- $depth := len (split (strings.Trim .Path "/") "/") -}}
+{{- $albums := partial "album-sort.html" .RegularPagesRecursive -}}
+{{- $panels := slice -}}
+{{- if lt $depth 3 -}}
+  {{- range .Sections.ByWeight -}}
+    {{- $all := partial "album-sort.html" .RegularPagesRecursive -}}
+    {{- $cover := dict -}}
+    {{- with index $all 0 }}{{ $cover = partial "album-cover.html" . }}{{ end -}}
+    {{- $n := partial "album-count.html" $all -}}
+    {{- $title := .Title -}}
+    {{- if eq $depth 2 }}{{ $title = printf "%s %s" $.Title .Title }}{{ end -}}
+    {{- $panels = $panels | append (dict "href" .RelPermalink "title" $title "sub" (printf "%d bilder" $n) "cover" $cover) -}}
+  {{- end -}}
+{{- else -}}
+  {{- range $albums -}}
+    {{- $panels = $panels | append (dict "href" .RelPermalink "title" .Params.photographer "sub" (printf "%s · %d bilder" .Title (int .Params.photo_count)) "cover" (partial "album-cover.html" .)) -}}
+  {{- end -}}
+{{- end -}}
+{{- if gt $depth 1 }}
+<p class="back"><a href="{{ .Parent.RelPermalink }}">&larr; {{ if eq $depth 2 }}Fotoalbum{{ else }}{{ .Parent.Title }}{{ end }}</a></p>
+{{- end }}
+<h1>{{ if eq $depth 3 }}{{ .Parent.Title }} {{ end }}{{ .Title }}</h1>
+{{ .Content }}
+{{ partial "album-panels.html" $panels }}
+{{ if gt $depth 1 }}{{ partial "album-showall.html" (partial "album-count.html" $albums) }}{{ partial "album-data.html" $albums }}{{ end }}
+{{ end }}

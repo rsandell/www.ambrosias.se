@@ -1,0 +1,9 @@
+{{- /* Bilderna i ett album (sida). Returnerar en lista: src, w, h, thumb, tw, th. */ -}}
+{{- $p := . -}}
+{{- $out := slice -}}
+{{- range $p.Resources.Match "[0-9][0-9][0-9].jpg" -}}
+  {{- $t := . -}}
+  {{- with $p.Resources.GetMatch (printf "thumbs/%s" (path.Base .Name)) }}{{ $t = . }}{{ end -}}
+  {{- $out = $out | append (dict "src" .RelPermalink "w" .Width "h" .Height "thumb" $t.RelPermalink "tw" $t.Width "th" $t.Height) -}}
+{{- end -}}
+{{- return $out -}}

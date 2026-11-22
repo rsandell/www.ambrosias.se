@@ -3,11 +3,12 @@ title: "Lyxpizza"
 slug: "lyxpizza"
 legacy_id: 2
 courses: ["Huvudrätt", "Förrätt"]
-servings: "2"
+servings: "2 personer"
 draft: false
 ---
 
-Till 2st. Tid 30+ 20+25
+Till 2st.\
+Tid 30+ 20+25
 
 ## Ingredienser
 - 1 pkt. Kungsörnen snabbpizza.

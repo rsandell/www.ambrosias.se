@@ -6,9 +6,14 @@ enableRobotsTXT = true
 
 [taxonomies]
   course = "courses"
+  kategori = "kategorier"
+  ar = "ar"
+  fotograf = "fotografer"
 
 [markup.goldmark.renderer]
   unsafe = false
+[markup.goldmark.parser.attribute]
+  block = true      # tillåter {.klass} under ett stycke
 
 [params]
   description = "Ambrosiasorden - Att njuta är att leva"

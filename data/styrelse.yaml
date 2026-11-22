@@ -1,0 +1,21 @@
+# Styrelsen, visas på sidan Info. Ändra här, inget annat behöver ändras.
+# Fält: name, title, mail och (valfritt) replacer med name och mail.
+# Inga telefonnummer. Ta bort en person genom att ta bort hela blocket.
+# Källa: den gamla koden (node/routes/styrelse.js), kontrollera att namn och
+# titlar stämmer innan publicering.
+- name: "Matthias Svensson"
+  title: "Ordförande"
+  mail: "marskalk@ambrosias.se"
+- name: "Robert Sandell"
+  title: "Sekreterare, Webmästare"
+  mail: "skrivare@ambrosias.se"
+- name: "Torben Lindqvist"
+  title: "Vice Ordförande"
+  mail: "harold@ambrosias.se"
+- name: "Maria Lindquist"
+  title: "Kassör"
+  mail: "skattmastare@ambrosias.se"
+# Exempel med ersättare:
+#  replacer:
+#    name: "Namn Namnsson"
+#    mail: "namn@ambrosias.se"

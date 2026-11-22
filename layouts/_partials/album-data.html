@@ -1,0 +1,10 @@
+{{- /* Data till bildvisaren: en lista album (sidor). Skrivs som JSON, album.js läser den. */ -}}
+{{- $albums := slice -}}
+{{- range . -}}
+  {{- $photos := slice -}}
+  {{- range partial "album-photos.html" . -}}
+    {{- $photos = $photos | append (dict "s" .src "w" .w "h" .h "m" .thumb) -}}
+  {{- end -}}
+  {{- $albums = $albums | append (dict "t" .Title "p" .Params.photographer "u" .RelPermalink "photos" $photos) -}}
+{{- end -}}
+<script type="application/json" id="photo-data">{{ $albums | jsonify | safeJS }}</script>
