@@ -46,7 +46,7 @@ Två saker att känna till:
 | `archetypes/` | Mallar för nya recept, album och blogginlägg |
 | `layouts/` | Sidmallar (HTML) |
 | `assets/` | `css/main.css`, `js/album.js` och PhotoSwipe (`vendor/photoswipe/`, exakt version i `VERSION`) |
-| `design/` | Logotypens källfiler (GIMP och PSD). Publiceras inte |
+| `design/` | Logotypens källfiler (GIMP och PSD) och `build-logo.sh`, som bygger om logotyp, favicon och vattenmärke som SVG/PNG i `static/`. Publiceras inte |
 | `migration/` | Skript och anteckningar från flytten från den gamla sajten. Sparas som historia, publiceras inte. `migration/scripts/import_album` är det som `./dev import-album` kör |
 | `docs/` | `migration.md` (planen) och ett dokument per arbetspaket. Publiceras inte |
 | `.github/` | `workflows/pages.yml` (bygger och publicerar) och `dependabot.yml` |

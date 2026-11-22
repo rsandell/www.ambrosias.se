@@ -34,13 +34,14 @@ body {
   body { background-image: url("../img/creampaper_@2X.png"); background-size: auto; }
 }
 
-/* Vattenmärke: stor blek sköld, centrerad och fast */
+/* Vattenmärke: stor blek sköld (enfärgad SVG, svagt genomsläpplig), centrerad och fast */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -1;
-  background: url("../img/bg-logo-005.png") no-repeat center 62% / contain;
+  opacity: 0.05;
+  background: url("../img/bg-shield.svg") no-repeat center 62% / contain;
   pointer-events: none;
 }
 

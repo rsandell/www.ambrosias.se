@@ -1,0 +1,4 @@
+# Verktyg för design/psd_to_svg.py (läser PSD, ritar SVG och PNG). Används bara när logotypen byggs om.
+FROM python:3.12-slim
+RUN apt-get update && apt-get install -y --no-install-recommends libcairo2 && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir psd-tools==1.27.0 Pillow==11.0.0 numpy cairosvg

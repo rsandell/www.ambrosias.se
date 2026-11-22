@@ -32,4 +32,4 @@ Alla kommandon i README kördes mot repot (Docker 29.1.3; Podman finns inte på 
 - Dependabot security alerts och GitHub Pages-inställningarna görs av ägaren på GitHub (WP 6).
 - README är inte läst av en person som inte är utvecklare. Gör en genomläsning innan publicering.
 - `docs/wp2-wp3-decisions.md` har en gammal punkt "Ännu inte gjort ... `README.md`, `THIRD-PARTY-NOTICES.txt`, Dependabot (WP 5)". Den är nu gjord (detta dokument är posten).
-- `migration/logo-trial/psd_to_svg.py` har ändringar som inte kommer från WP 5 (WP 4 pågår). De ingår inte i WP 5-committen.
+- `psd_to_svg.py` flyttades i WP 4 till `design/` (se `docs/wp4-logo.md`).
