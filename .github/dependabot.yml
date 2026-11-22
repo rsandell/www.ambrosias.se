@@ -1,0 +1,19 @@
+# Uppdateringar en gång i månaden, samlade i en enda pull request åt gången.
+# Hugo-versionen står som ARG i Dockerfile och bevakas inte av Dependabot
+# (se README, avsnittet Underhåll). PhotoSwipe är vendorad (assets/vendor/photoswipe/).
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    groups:
+      alla:
+        patterns: ["*"]
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    groups:
+      alla:
+        patterns: ["*"]

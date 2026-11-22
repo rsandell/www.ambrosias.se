@@ -1,0 +1,56 @@
+Tredjepartskod och tredjepartsresurser i Ambrosiasordens webbplats
+===================================================================
+
+Webbplatsen har inga andra körtidsberoenden än PhotoSwipe (ingen CDN, inga
+typsnitt, inga ikonfonter, ingen statistik). Resten är verktyg som bara används
+när sajten byggs. Allt som webbläsaren hämtar serveras från sajten själv.
+
+Ingår i den publicerade sajten
+------------------------------
+
+PhotoSwipe 5.4.4 (bildvisaren i fotoalbumen)
+  Filer: assets/vendor/photoswipe/ (bunten ingår i sajtens JavaScript)
+  https://photoswipe.com/
+  Licens: MIT
+
+    The MIT License (MIT)
+
+    Copyright (c) 2014-2022 Dmitry Semenov, https://dimsemenov.com
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.
+
+Bakgrundsmönstret "Cream paper" (static/img/creampaper.png)
+  Made by Devin Holmes, http://www.strick9design.com/
+  Från Subtle Patterns, http://subtlepatterns.com/cream-paper/
+
+Färgschemat
+  Genererat med Color Scheme Designer, http://colorschemedesigner.com/
+  (c) Petr Stanicek 2002-2010
+
+Bara verktyg vid bygget (ingår inte i den publicerade sajten)
+-------------------------------------------------------------
+
+Hugo (extended), https://gohugo.io/ - Apache License 2.0
+  https://github.com/gohugoio/hugo/blob/master/LICENSE
+  Programmet genererar sidorna. Ingen Hugo-kod skickas till besökaren.
+
+Pillow 11.0.0, https://python-pillow.org/ - MIT-CMU (HPND)
+  Används av migration/scripts/import_album för att förminska fotona.
+
+Python 3 (python:3.12-slim) och Debian, i verktygsbilden (Dockerfile).
