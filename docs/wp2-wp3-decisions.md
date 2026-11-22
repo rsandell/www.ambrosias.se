@@ -22,12 +22,12 @@ Skrivet efter WP 2 (recept och statiska sidor) och WP 3 (album).
 
 - **Konvertering:** egen liten HTML-till-Markdown-omvandlare (`migration/scripts/htmlmd.py`) i stället för pandoc, som inte finns i verktygsbilden. Varje konverteringsskript jämför orden före och efter och avslutar med felkod om de skiljer sig.
 - **Receptformat:** ett stycke med 3 rader eller fler i tillredningen blir numrerad lista. Ett stycke med 1 till 2 rader blir vanligt stycke, med hård radbrytning (`\`) där källan hade `<br>`. Ingrediensrader som bara är fetstil (till exempel "Till Garnering" i Ambrosia Tårta) blir en egen rad mellan två punktlistor. Dryckesförslag med fler än en rad blir punktlista.
-- **Länkar i Markdown:** länkar som börjar med `/` får baseURL-prefix via `layouts/_markup/render-link.html`. Det gör att sajten fungerar även på `rsandell.github.io/www.ambrosias.se/` vid testpubliceringen.
+- **Länkar i Markdown:** länkar som börjar med `/` får baseURL-prefix via `layouts/_markup/render-link.html`. Det gör att sajten fungerar även på `rsandell.github.io/www.ambrosias.se/` vid testpubliceringen. **Rättat i granskningen före WP 6:** `relURL` lägger inte till baseURL-sökvägen för indata som börjar med `/`, så kroken tar bort inledande `/` först (`strings.TrimPrefix "/"`), och logotypen i sidhuvudet använder `site.Home.RelPermalink`.
 - **`{.kalla}`-attribut:** blockattribut är påslagna i `hugo.toml` (`markup.goldmark.parser.attribute.block`) så att källraden på klädkodssidorna kan få en CSS-klass.
 - **Info-sidan** använder `layout: info` och mallen `layouts/info.html`. Innehållet (avgiftstexten) ligger i `content/info.md`, dokument och styrelse i `data/`.
 - **Bildfiler:** i varje albumpaket ligger webbversionerna som `001.jpg` osv. och miniatyrerna i `thumbs/001.jpg`. Om en bild är 400 px eller mindre finns ingen miniatyr och själva bilden används.
 - **Metadata:** EXIF, GPS, XMP och IPTC tas bort. Original som kopieras oförändrade rensas utan omkodning (`strip_jpeg`). Bilder med EXIF-orientering omkodas alltid, så att bredd och höjd i Hugo stämmer med det webbläsaren visar.
-- **Bevarade värden vid omkörning:** `import_album` behåller `date`, `cover` och `legacy_id` från en befintlig `index.md`. Övriga fält skrivs om. Ett eget datum överlever alltså en omkörning, men `--date` har företräde.
+- **Bevarade värden vid omkörning:** `import_album` behåller `date`, `cover`, `legacy_id`, titeln (utan `--title`) och texten efter front matter från en befintlig `index.md` (ändrat i granskningen före WP 6). Övriga fält skrivs om. Ett eget datum överlever alltså en omkörning, men `--date` har företräde.
 - **Ordning i bildspel:** albumen sorteras efter datum och sedan fotografens namn. Hugos sortering är skiftlägesokänslig, så "eAx" hamnar före "Mannenmedspannen".
 - **Lightbox:** PhotoSwipe 5.4.4, vendorad (inte npm) med exakt version i `assets/vendor/photoswipe/VERSION`, och buntad med `js.Build`. Albumdata läggs som JSON i sidan. Knappen "Visa alla bilder" är `hidden` tills JavaScript körs. Miniatyrerna är riktiga länkar till bilden, så sidan fungerar utan JavaScript.
 - **Uppskjutna album:** Nyår 2012 (Henrik Karlsson) och Midsommar 2008 finns som `draft: true`. Midsommar-kategorin och årssidan är också draft, så en tom Midsommar-panel visas inte. Importskriptet tar bort `draft` på kategori- och årssidorna när albumet importeras.
@@ -36,7 +36,7 @@ Skrivet efter WP 2 (recept och statiska sidor) och WP 3 (album).
 
 - **Repot är undermappen `www.ambrosias.se/`**, inte projektmappen. `migration/db/` och `../gallery/` ligger utanför repot och ska aldrig dit. `convert_recipes` läser därför `../migration/db/tables` som standard.
 - **Allt är committat på `master`** (WP 2 och 3 i commit `73c254d`, granskningsrättningar i `bf34d7d`). Inget är pushat. `public/`, `resources/_gen/` och `__pycache__/` är ignorerade.
-- **Hugo-flaggan för utkast är `-D`**, inte `--drafts`. `./dev serve --drafts` stämmer med `hugo server`, men `./dev build --drafts` ger fel.
+- **Hugo-flaggan för utkast är `-D`**, inte `--drafts`; `hugo server --drafts` finns inte. **Rättat i granskningen före WP 6:** `./dev` översätter `--drafts` till `-D`, så både `./dev serve --drafts` och `./dev build --drafts` fungerar.
 - **`./dev import-album` kräver att zipens sökväg saknar mellanslag** om zipen ligger utanför `ORIGINALS_DIR`. Samma begränsning finns i `./dev` för repots egen sökväg (`-v $PWD:/site`).
 - **Gamla zip-namn:** `Nyårsafton ...-Bobby.zip` ger kategori Nyår, fotograf Robert Sandell och titeln "Nyårsafton 2011". Övriga zippar ger titeln av filnamnet. Titeln kan ändras med `--title`.
 - **`legacy_id`** skickas bara med av `import_all_albums`. Vid en vanlig enskild import saknas det om albumet är nytt.

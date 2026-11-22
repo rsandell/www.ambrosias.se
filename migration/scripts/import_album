@@ -26,6 +26,7 @@ Datum: Nyår 30 dec, Valborg 30 apr. Midsommar och övriga kräver --date ÅÅÅ
 """
 import argparse
 import io
+import json
 import os
 import re
 import struct
@@ -168,6 +169,7 @@ def process_photo(job):
     im = ImageOps.exif_transpose(im)
     if im.mode not in ("RGB", "L"):
         im = im.convert("RGB")
+        icc = None   # CMYK-profilen hör inte till RGB-bilden
     if need_resize:
         im.thumbnail((web_edge, web_edge), Image.LANCZOS)    # aldrig uppskalning
     encoded = encode(im, q_web, icc)
@@ -175,7 +177,7 @@ def process_photo(job):
     mode = "omkodad"
     if orient == 1 and original is not None and len(encoded) >= len(original) and not need_resize:
         web, (w, h), mode = original, (w0, h0), "original"
-    elif orient == 1 and original is not None and len(encoded) >= n_in:
+    elif orient == 1 and original is not None and len(encoded) >= n_in and not need_resize:
         web, (w, h), mode = original, (w0, h0), "original"   # sällsynt: omkodning blev större
     else:
         web, (w, h) = encoded, im.size
@@ -197,7 +199,6 @@ def process_photo(job):
 
 # ---------------------------------------------------------------- Markdown
 def q(s):
-    import json
     return json.dumps(s, ensure_ascii=False)
 
 
@@ -214,7 +215,14 @@ def read_old(path):
     for key in ("date", "cover", "legacy_id", "title"):
         mm = re.search(r"(?m)^%s:\s*(.+?)\s*$" % key, m.group(1))
         if mm:
-            old[key] = mm.group(1).strip().strip('"')
+            v = mm.group(1).strip()
+            if v.startswith('"'):
+                try:
+                    v = json.loads(v)
+                except ValueError:
+                    v = v.strip('"')
+            old[key] = v
+    old["body"] = text[m.end():].lstrip("\n")
     return old
 
 
@@ -240,7 +248,7 @@ def front_matter(meta):
         "photos:",
     ]
     fm += ["  - " + q(n) for n in meta["photos"]]
-    return "---\n" + "\n".join(fm) + "\n---\n"
+    return "---\n" + "\n".join(fm) + "\n---\n" + ("\n" + meta["body"] if meta.get("body") else "")
 
 
 def ensure_section(path, title, weight):
@@ -282,7 +290,7 @@ def main():
         cat = CATEGORIES.get(a.category.lower(), a.category)
     year = a.year or year
     phot = PHOTOGRAPHER_ALIASES.get((a.photographer or "").lower(), a.photographer) if a.photographer else phot
-    title = a.title or title
+    title = a.title or title   # en handredigerad titel i index.md bevaras nedan, om --title saknas
     if not (cat and year and phot):
         sys.exit("Kan inte avgöra kategori/år/fotograf från zipnamnet. Ange --category --year --photographer.")
 
@@ -290,6 +298,8 @@ def main():
     bundle = os.path.join(a.content_dir, cat_slug, str(year), phot_slug)
     index_md = os.path.join(bundle, "index.md")
     old = read_old(index_md)
+    if not a.title and old.get("title"):
+        title = old["title"]
 
     if a.date:
         date = a.date
@@ -343,6 +353,7 @@ def main():
         "legacy_id": a.legacy_id or old.get("legacy_id"), "photo_count": len(results),
         "cover": cover, "original_zip": nfc(os.path.basename(a.zip)),
         "photos": [r["orig"] for r in results],
+        "body": old.get("body", ""),
     }
     with open(index_md, "w", encoding="utf-8") as f:
         f.write(front_matter(meta))

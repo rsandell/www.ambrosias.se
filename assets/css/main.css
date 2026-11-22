@@ -8,7 +8,7 @@
   --gold-light: #F6D89C;
   --blue-mid: #658ADD;
   --blue-light: #94AADD;
-  --bronze: #9A7B3D;
+  --bronze: #7A5F26;   /* mörkare än gamla #9A7B3D: vit text 6,0:1 */
   --navy: #2F4067;
   --ink: #1d2433;
   --paper: #f4efe2;
@@ -47,7 +47,8 @@ body::before {
 
 a { color: var(--blue); }
 a:hover { color: var(--navy); }
-:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }   /* 7,9:1 mot papperet */
+.site-header :focus-visible, .site-footer :focus-visible { outline-color: var(--gold); }
 
 /* Sidhuvud */
 .site-header {
@@ -103,8 +104,9 @@ nav a[aria-current="page"] {
   .wordmark { display: none; }
   .bar { flex-wrap: wrap; }
   .menu-toggle { display: block; }
-  #site-nav { display: none; flex-basis: 100%; }
-  #site-nav.open { display: block; }
+  #site-nav { flex-basis: 100%; }
+  .js #site-nav { display: none; }
+  .js #site-nav.open { display: block; }
   #site-nav ul { flex-direction: column; }
   .logo img { margin-bottom: -1.2rem; width: 4rem; }
   .logo { width: 4rem; }
@@ -115,8 +117,7 @@ nav a[aria-current="page"] {
 h1, h2, h3 { color: var(--blue); line-height: 1.2; }
 h1 { font-size: clamp(1.8rem, 1.4rem + 1.6vw, 2.5rem); margin: 0 0 1.25rem; padding-bottom: 0.4rem; border-bottom: 2px solid var(--blue-light); }
 h2 { margin-top: 1.8rem; }
-.lead { font-size: 1.15em; }
-.divider-photo { margin: 2rem 0 0; }
+.divider-photo { margin: 2rem auto 0; width: fit-content; max-width: 100%; }
 .divider-photo img { max-width: 100%; height: auto; border: 3px solid var(--blue); border-radius: 4px; display: block; }
 
 /* Recept: flikar, lista till vänster och recept till höger */
@@ -141,7 +142,7 @@ h2 { margin-top: 1.8rem; }
 .recipe-list li + li { border-top: 1px solid var(--blue-light); }
 .recipe-list a { display: block; padding: 0.5rem 0.75rem; text-decoration: none; }
 .recipe-list a:hover { background: rgb(148 170 221 / 0.35); }
-.recipe-list a[aria-current="page"] { background: var(--blue-mid); color: #fff; font-weight: 700; }
+.recipe-list a[aria-current="page"] { background: var(--navy); color: #fff; font-weight: 700; }
 .recipe { padding: 0 0 1rem; }
 .recipe:empty { display: none; }
 .recipe h2:first-child { margin-top: 1rem; }
@@ -155,12 +156,12 @@ h2 { margin-top: 1.8rem; }
 .site-footer {
   background: var(--blue);
   border-top: 3px solid var(--gold);
-  color: var(--gold);
+  color: var(--gold-light);   /* 6,6:1 mot blått; guld bara i linjen */
   text-align: right;
   padding: 0.5rem 1rem;
 }
 .site-footer p { max-width: 62rem; margin: 0 auto; font-size: 0.9rem; }
-.site-footer a { color: var(--gold); }
+.site-footer a { color: var(--gold-light); }
 
 @media (prefers-reduced-motion: reduce) {
   * { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
@@ -188,7 +189,7 @@ dl dd { margin: 0 0 0.5rem 0; }
 .board-member dd { margin: 0; }
 table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
 td, th { text-align: left; vertical-align: top; padding: 0.4rem 0.6rem; border-top: 1px solid var(--blue-light); }
-thead { display: none; }
+thead:not(:has(th:not(:empty))) { display: none; }   /* bara tomma rubrikrader (Om-sidans tabell) */
 
 /* Fotoalbum */
 .panels { list-style: none; margin: 0 0 1.5rem; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); gap: 1rem; }

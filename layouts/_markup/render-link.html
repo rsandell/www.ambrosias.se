@@ -1,5 +1,5 @@
 {{- /* Länkar som börjar med / (t.ex. /klädkod/frack/) får sajtens baseURL-prefix, så att
        sajten fungerar även under en undersökväg (t.ex. rsandell.github.io/www.ambrosias.se/). */ -}}
 {{- $dest := .Destination -}}
-{{- if and (hasPrefix $dest "/") (not (hasPrefix $dest "//")) }}{{ $dest = $dest | relURL }}{{ end -}}
+{{- if and (hasPrefix $dest "/") (not (hasPrefix $dest "//")) }}{{ $dest = strings.TrimPrefix "/" $dest | relURL }}{{ end -}}
 <a href="{{ $dest | safeURL }}"{{ with .Title }} title="{{ . }}"{{ end }}{{ if strings.HasPrefix .Destination "http" }} rel="noopener"{{ end }}>{{ .Text | safeHTML }}</a>

@@ -34,7 +34,6 @@ cd www.ambrosias.se
 Två saker att känna till:
 
 - Sökvägen till repot får inte innehålla mellanslag (Docker-montering).
-- `./dev build` tar inte `--drafts`. Använd `-D` (`./dev build -D`). `./dev serve --drafts` fungerar.
 
 ## Mappar
 
@@ -107,7 +106,7 @@ Originalfotona läggs **inte** i Git och inte på sajten. De finns i din egen ba
 5. **Committa** hela albumet (`git add content/album`, `git commit`) och publicera. Kontrollera storleken först: ett album är ofta 2 till 40 MB förminskat.
 
 Notera:
-- Samma kategori, år och fotograf ger samma mapp. En andra import skriver över den första, och två album med samma tripplett kan inte finnas. Titeln kan ändras med `--title`.
+- Samma kategori, år och fotograf ger samma mapp. En andra import skriver över den första: bilder och `index.md` skrivs om, men `date`, `cover`, `legacy_id`, titeln (om du inte anger `--title`) och all text under front matter (efter andra `---`) bevaras. Övriga egna front matter-fält försvinner, och två album med samma tripplett kan inte finnas. Titeln kan ändras med `--title`.
 - Fotografen `Bobby` skrivs `Robert Sandell`.
 - Datumet blir 30 december för Nyår och 30 april för Valborg. Ändra `date:` i `index.md` om det ska vara något annat. Det överlever en omkörning (`--date` har företräde).
 - Taxonomifälten `kategorier`, `ar` och `fotografer` i front matter skapas av skriptet. Ändra dem inte för hand.
@@ -236,7 +235,6 @@ git push
 | `Flytta zipfilen till en sökväg utan mellanslag` | Zipen ligger utanför `ORIGINALS_DIR` i en mapp med mellanslag. Flytta den |
 | Konstiga tecken i filnamn eller `Nyårsafton` blir fel kategori | Namnge zipen enligt `<Kategori> <År> <Fotograf>.zip` eller ange `--category --year --photographer` |
 | Fotona är för stora | Skriptet håller längsta sidan till 1600 px. Är sajten ändå för stor kan `WEB_EDGE` och `Q_WEB` i `migration/scripts/import_album` sänkas (till exempel 1400 och 78) och albumen importeras om |
-| `./dev build --drafts` ger fel | Flaggan heter `-D` vid bygge: `./dev build -D` |
 | Filer i repot ägs av root | Kör inte `./dev` med `sudo`. Med Docker som vanlig användare i gruppen `docker` blir ägaren du |
 | Bygget går inte efter ändrad Hugo-version | `./dev rebuild-image` |
 | SELinux eller rättighetsfel vid montering | `./dev` lägger själv till `:Z` på SELinux-värdar. Med Podman används `--userns=keep-id` |
@@ -244,7 +242,7 @@ git push
 ## Underhåll
 
 - **Uppdatera Hugo:** ändra `ARG HUGO_VERSION` i `Dockerfile` (ett ställe), kör `./dev rebuild-image`, sedan `./dev build` och titta på sajten med `./dev serve`. Commit och push. GitHub Actions använder samma `Dockerfile`. Dependabot bevakar inte Hugo-versionen, så kolla själv en gång om året på <https://github.com/gohugoio/hugo/releases>.
-- **Uppdatera PhotoSwipe:** byt filerna i `assets/vendor/photoswipe/` mot den nya versionen (hämta paketet `photoswipe` från npm) och uppdatera `VERSION`. Testa ett album och bildspelet. Uppdatera versionen i `THIRD-PARTY-NOTICES.txt`.
+- **Uppdatera PhotoSwipe:** byt filerna i `assets/vendor/photoswipe/` mot den nya versionen (hämta paketet `photoswipe` från npm) och uppdatera `VERSION`. Kontrollera att `pswp.goTo` i `assets/js/album.js` fortfarande stämmer med PhotoSwipes egen `goTo` (den använder interna fält, `mainScroll.moveIndexBy` och `potentialIndex`). Testa ett album och bildspelet. Uppdatera versionen i `THIRD-PARTY-NOTICES.txt`.
 - **Dependabot:** `.github/dependabot.yml` ger **högst en samlad pull request i månaden** för GitHub Actions och basbilden i `Dockerfile`. Slå på Dependabot security alerts under Settings, Code security. Sajten är statisk (inga inloggningar, cookies eller formulär), så ett fel i ett frontend-bibliotek har begränsad påverkan.
 - **Årlig rutin:** titta på den öppna Dependabot-pull requesten, uppdatera Hugo och PhotoSwipe, kör `./dev build`, titta på ett album och pusha. Kontrollera också att styrelselistan och Drive-länkarna stämmer.
 - **Domän och HTTPS:** GitHub Pages under Settings, Pages. Källa: **GitHub Actions**. Anpassad domän `www.ambrosias.se` (filen `static/CNAME` läggs till vid publiceringen och ska innehålla den). DNS: `www` som CNAME till `rsandell.github.io`. `ambrosias.se` utan `www` pekas till GitHubs Pages-adresser (A- och AAAA-poster, aktuell lista finns i GitHubs dokumentation) och skickas då vidare till `www`. Slå på **Enforce HTTPS** när certifikatet är klart.
